@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { Phone, Mail, MapPin, Facebook, Instagram, Star } from "lucide-react";
 import { BUSINESS, whatsappLink } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 
 export default function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="bg-vv-black text-white border-t border-vv-yellow/20">
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-16">
@@ -31,9 +33,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-white/65 text-sm leading-relaxed mb-4">
-              Reemplazo y reparación de vidrios automotrices en San Diego. Vidrios
-              nuevos y usados para todas las marcas. Cotización gratis, servicio
-              móvil y garantía de por vida.
+              {t("footer.tagline")}
             </p>
             <div className="flex items-center gap-3">
               <a
@@ -69,61 +69,38 @@ export default function Footer() {
           {/* Quick links */}
           <div className="md:col-span-2">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-3 text-vv-yellow">
-              Enlaces
+              {t("footer.links")}
             </h4>
             <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <a href="#servicios" className="hover:text-vv-yellow transition-colors">
-                  Servicios
-                </a>
-              </li>
-              <li>
-                <a href="#agendar" className="hover:text-vv-yellow transition-colors">
-                  Agendar Cita
-                </a>
-              </li>
-              <li>
-                <a href="#testimonios" className="hover:text-vv-yellow transition-colors">
-                  Testimonios
-                </a>
-              </li>
-              <li>
-                <a href="#antes-despues" className="hover:text-vv-yellow transition-colors">
-                  Antes y Después
-                </a>
-              </li>
-              <li>
-                <a href="#faq" className="hover:text-vv-yellow transition-colors">
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a href="#ubicacion" className="hover:text-vv-yellow transition-colors">
-                  Contacto
-                </a>
-              </li>
+              <li><a href="#servicios" className="hover:text-vv-yellow transition-colors">{t("nav.services")}</a></li>
+              <li><a href="#agendar" className="hover:text-vv-yellow transition-colors">{t("header.book")}</a></li>
+              <li><a href="#testimonios" className="hover:text-vv-yellow transition-colors">{t("nav.testimonials")}</a></li>
+              <li><a href="#antes-despues" className="hover:text-vv-yellow transition-colors">{t("nav.beforeAfter")}</a></li>
+              <li><a href="#experto" className="hover:text-vv-yellow transition-colors">{t("nav.about")}</a></li>
+              <li><a href="#faq" className="hover:text-vv-yellow transition-colors">{t("nav.faq")}</a></li>
+              <li><a href="#ubicacion" className="hover:text-vv-yellow transition-colors">{t("footer.contact")}</a></li>
             </ul>
           </div>
 
           {/* Services */}
           <div className="md:col-span-3">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-3 text-vv-yellow">
-              Servicios
+              {t("footer.services")}
             </h4>
             <ul className="space-y-2 text-sm text-white/70">
-              <li>Reemplazo de Parabrisas</li>
-              <li>Reparación de Grietas</li>
-              <li>Cristales Laterales</li>
-              <li>Vidrio Trasero</li>
-              <li>Vehículos Vandalizados</li>
-              <li>Servicio Móvil</li>
+              <li>{t("footer.f1")}</li>
+              <li>{t("footer.f2")}</li>
+              <li>{t("footer.f3")}</li>
+              <li>{t("footer.f4")}</li>
+              <li>{t("footer.f5")}</li>
+              <li>{t("footer.f6")}</li>
             </ul>
           </div>
 
           {/* Contact */}
           <div className="md:col-span-3">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-3 text-vv-yellow">
-              Contacto
+              {t("footer.contact")}
             </h4>
             <ul className="space-y-2.5 text-sm text-white/70">
               <li>
@@ -185,8 +162,7 @@ export default function Footer() {
             Auto Glass El Cajon · Auto Glass National City
           </p>
           <p className="text-white/50 text-xs text-center">
-            © 2026 V&amp;V Auto Glass. Todos los derechos reservados. · Lic.
-            #CA-AG-12345 · Asegurado · Better Business Bureau A+
+            {t("footer.rights")} · {BUSINESS.license} · Asegurado · Better Business Bureau A+
           </p>
         </div>
       </div>

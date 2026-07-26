@@ -3,9 +3,11 @@
 import { motion } from "framer-motion";
 import { MapPin, Clock, Navigation, Phone } from "lucide-react";
 import { BUSINESS, whatsappLink } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
 export default function ServiceArea() {
+  const { t, lang } = useI18n();
   return (
     <section
       id="ubicacion"
@@ -14,16 +16,15 @@ export default function ServiceArea() {
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-          <p className="kicker text-vv-yellow-deep mb-3">Dónde Estamos</p>
+          <p className="kicker text-vv-yellow-deep mb-3">{t("area.kicker")}</p>
           <h2
             id="area-heading"
             className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            Servimos todo <span className="text-gradient-yellow">San Diego County</span>
+            {t("area.title.a")} <span className="text-gradient-yellow">{t("area.title.b")}</span>
           </h2>
           <p className="mt-4 text-vv-black/70 text-base md:text-lg">
-            Visítanos en el taller o te visitamos en casa. Servicio móvil
-            disponible en toda el área.
+            {t("area.sub")}
           </p>
         </div>
 
@@ -63,7 +64,7 @@ export default function ServiceArea() {
             <div className="space-y-4 text-sm flex-1">
               <div>
                 <div className="text-white/50 text-[11px] uppercase tracking-wider mb-1">
-                  Dirección
+                  {t("area.address")}
                 </div>
                 <div className="font-medium">{BUSINESS.address}</div>
               </div>
@@ -71,16 +72,20 @@ export default function ServiceArea() {
               <div>
                 <div className="text-white/50 text-[11px] uppercase tracking-wider mb-2 flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5 text-vv-yellow" />
-                  Horario
+                  {t("area.hours")}
                 </div>
                 <div className="space-y-1">
-                  {BUSINESS.hours.map((h) => (
+                  {BUSINESS.hours.map((h, i) => (
                     <div
-                      key={h.day}
+                      key={i}
                       className="flex justify-between text-xs md:text-sm"
                     >
-                      <span className="text-white/70">{h.day}</span>
-                      <span className="font-medium">{h.time}</span>
+                      <span className="text-white/70">
+                        {lang === "en" ? h.dayEn : h.day}
+                      </span>
+                      <span className="font-medium">
+                        {lang === "en" ? h.timeEn ?? h.time : h.time}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -88,7 +93,7 @@ export default function ServiceArea() {
 
               <div>
                 <div className="text-white/50 text-[11px] uppercase tracking-wider mb-2">
-                  Contacto
+                  {t("area.contact")}
                 </div>
                 <div className="flex flex-col gap-2 text-sm">
                   <a
@@ -102,8 +107,9 @@ export default function ServiceArea() {
                     href={whatsappLink("Hola V&V Auto Glass, necesito información")}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/80 hover:text-vv-yellow transition-colors"
+                    className="text-white/80 hover:text-vv-yellow transition-colors inline-flex items-center gap-1.5"
                   >
+                    <span className="h-2 w-2 rounded-full bg-vv-green pulse-green-dot" />
                     WhatsApp: {BUSINESS.whatsappDisplay}
                   </a>
                   <a
@@ -117,16 +123,16 @@ export default function ServiceArea() {
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Button asChild className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12">
+              <Button asChild className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 flex-1">
                 <a href={BUSINESS.mapDirections} target="_blank" rel="noopener noreferrer">
                   <Navigation className="mr-2 h-4 w-4" />
-                  Cómo Llegar
+                  {t("area.directions")}
                 </a>
               </Button>
-              <Button asChild variant="outline" className="border-white/30 text-white hover:bg-white hover:text-vv-black bg-transparent h-12">
+              <Button asChild variant="outline" className="border-white/30 text-white hover:bg-white hover:text-vv-black bg-transparent h-12 flex-1">
                 <a href={`tel:${BUSINESS.phoneTel}`}>
                   <Phone className="mr-2 h-4 w-4" />
-                  Llamar
+                  {t("area.call")}
                 </a>
               </Button>
             </div>
@@ -136,7 +142,7 @@ export default function ServiceArea() {
         {/* Service area pills */}
         <div className="mt-10">
           <p className="text-center text-vv-black/60 text-sm mb-4 font-semibold uppercase tracking-wider">
-            Zonas que cubrimos
+            {t("area.zones")}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             {BUSINESS.serviceAreas.map((a, i) => (

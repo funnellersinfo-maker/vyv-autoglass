@@ -2,35 +2,18 @@
 
 import { motion } from "framer-motion";
 import { Zap, DollarSign, Car, ShieldCheck } from "lucide-react";
-
-const benefits = [
-  {
-    icon: Zap,
-    title: "Atención el Mismo Día",
-    desc: "Tu parabrisas roto no puede esperar. Atendemos hoy mismo en San Diego y áreas cercanas, incluyendo Chula Vista, La Mesa, El Cajon y National City. Si llamas antes de las 2pm, agendamos para el mismo día. Tu seguridad y la de tu familia es nuestra prioridad. No dejes el problema para mañana.",
-    micro: "Sin letra pequeña.",
-  },
-  {
-    icon: DollarSign,
-    title: "Cotización Gratis",
-    desc: "Sin costo, sin compromiso. Te damos el precio exacto antes de empezar cualquier trabajo. Comparar es libre: evalúa opciones, consulta con tu seguro y decide con calma. Nuestros precios son transparentes y competitivos en todo San Diego County. Sabemos que el dinero importa y respetamos tu presupuesto.",
-    micro: "Precio justo, sin sorpresas.",
-  },
-  {
-    icon: Car,
-    title: "Todas las Marcas y Modelos",
-    desc: "Desde Honda hasta BMW, desde una camioneta RAM hasta un Tesla. Vidrios nuevos y usados disponibles para mantener precios accesibles. Trabajamos con autos nacionales, asiáticos, europeos y de lujo. Tenemos inventario en almacén o lo conseguimos en 24 horas. Si tiene vidrio, lo reemplazamos.",
-    micro: "Si tiene vidrio, lo reemplazamos.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Garantía por Escrito",
-    desc: "Respaldamos cada instalación con garantía de por vida en la mano de obra. Si el vidrio presenta fugas, ruidos o problemas de instalación, lo corregimos sin costo. Garantía del fabricante en el vidrio también incluida. Sin letra pequeña, sin excusas, sin cobros escondidos. Tu tranquilidad es parte del servicio.",
-    micro: "Si algo falla, lo arreglamos sin costo.",
-  },
-];
+import { useI18n } from "@/lib/i18n";
 
 export default function Benefits() {
+  const { t } = useI18n();
+
+  const benefits = [
+    { icon: Zap, tKey: "b1" },
+    { icon: DollarSign, tKey: "b2" },
+    { icon: Car, tKey: "b3" },
+    { icon: ShieldCheck, tKey: "b4" },
+  ];
+
   return (
     <section
       aria-labelledby="benefits-heading"
@@ -38,25 +21,19 @@ export default function Benefits() {
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-          <p className="kicker text-vv-yellow-deep mb-3">Por qué V&amp;V Auto Glass</p>
+          <p className="kicker text-vv-yellow-deep mb-3">{t("benefits.kicker")}</p>
           <h2
             id="benefits-heading"
             className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            No solo cambiamos vidrios.
-            <br />
-            <span className="text-gradient-yellow">Cambiamos tu experiencia.</span>
+            {t("benefits.title")}
           </h2>
-          <p className="mt-4 text-vv-black/70 text-base md:text-lg">
-            Cinco razones por las que más de 5,000 conductores en San Diego nos
-            han elegido para proteger lo que más importa.
-          </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {benefits.map((b, i) => (
             <motion.div
-              key={b.title}
+              key={b.tKey}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
@@ -67,10 +44,14 @@ export default function Benefits() {
               <div className="mb-4 inline-grid place-items-center h-12 w-12 rounded-xl bg-vv-yellow/15 text-vv-yellow-deep group-hover:bg-vv-yellow group-hover:text-vv-black transition-colors">
                 <b.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-vv-black font-bold text-lg mb-2">{b.title}</h3>
-              <p className="text-vv-black/70 text-sm leading-relaxed">{b.desc}</p>
+              <h3 className="text-vv-black font-bold text-lg mb-2">
+                {t(`benefits.${b.tKey}.t`)}
+              </h3>
+              <p className="text-vv-black/70 text-sm leading-relaxed">
+                {t(`benefits.${b.tKey}.d`)}
+              </p>
               <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-vv-yellow-deep">
-                ✓ {b.micro}
+                ✓ {t(`benefits.${b.tKey}.m`)}
               </p>
             </motion.div>
           ))}

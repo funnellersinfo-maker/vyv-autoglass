@@ -1,0 +1,901 @@
+     1→"use client";
+     2→
+     3→import { useState, useRef, useMemo } from "react";
+     4→import { AnimatePresence, motion } from "framer-motion";
+     5→import { Button } from "@/components/ui/button";
+     6→import { Input } from "@/components/ui/input";
+     7→import { Label } from "@/components/ui/label";
+     8→import { Textarea } from "@/components/ui/textarea";
+     9→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+    10→import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+    11→import {
+    12→  CheckCircle2,
+    13→  ChevronLeft,
+    14→  ChevronRight,
+    15→  Car,
+    16→  Camera,
+    17→  Settings2,
+    18→  CalendarClock,
+    19→  User,
+    20→  Upload,
+    21→  X,
+    22→  ShieldCheck,
+    23→  Clock,
+    24→  Sparkles,
+    25→  PartyPopper,
+    26→  Loader2,
+    27→  AlertCircle,
+    28→} from "lucide-react";
+    29→import { BUSINESS, whatsappLink } from "@/lib/business";
+    30→import { useToast } from "@/hooks/use-toast";
+    31→
+    32→type FormData = {
+    33→  brand: string;
+    34→  model: string;
+    35→  year: string;
+    36→  glassType: string;
+    37→  hasInsurance: boolean;
+    38→  photo: File | null;
+    39→  when: string;
+    40→  where: string;
+    41→  address: string;
+    42→  serviceDate: string;
+    43→  serviceTime: string;
+    44→  name: string;
+    45→  phone: string;
+    46→  email: string;
+    47→  notes: string;
+    48→};
+    49→
+    50→const STEPS = [
+    51→  { id: 1, label: "Vehículo", icon: Car },
+    52→  { id: 2, label: "Daño", icon: Camera },
+    53→  { id: 3, label: "Servicio", icon: Settings2 },
+    54→  { id: 4, label: "Agenda", icon: CalendarClock },
+    55→  { id: 5, label: "Contacto", icon: User },
+    56→];
+    57→
+    58→const ENCOURAGE: Record<number, string> = {
+    59→  1: "🚗 Empecemos. Esto toma menos de 2 minutos.",
+    60→  2: "📸 Con una foto basta para cotizar exacto.",
+    61→  3: "⚙️ ¡Casi listo! Dinos dónde y cuándo.",
+    62→  4: "📅 ¡Ya casí! Solo unos datos más.",
+    63→  5: "📞 Último paso. Te llamaremos en 15 min.",
+    64→};
+    65→
+    66→function formatPhone(v: string) {
+    67→  const digits = v.replace(/\D/g, "").slice(0, 10);
+    68→  if (digits.length === 0) return "";
+    69→  if (digits.length < 4) return `(${digits}`;
+    70→  if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    71→  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    72→}
+    73→
+    74→function nextDates(count: number) {
+    75→  const out: { iso: string; weekday: string; day: string; month: string }[] = [];
+    76→  const today = new Date();
+    77→  for (let i = 0; i < count; i++) {
+    78→    const d = new Date(today);
+    79→    d.setDate(today.getDate() + i);
+    80→    out.push({
+    81→      iso: d.toISOString().slice(0, 10),
+    82→      weekday: d.toLocaleDateString("es-US", { weekday: "short" }),
+    83→      day: String(d.getDate()),
+    84→      month: d.toLocaleDateString("es-US", { month: "short" }),
+    85→    });
+    86→  }
+    87→  return out;
+    88→}
+    89→
+    90→const glassTypes = [
+    91→  { value: "Parabrisas", label: "Parabrisas" },
+    92→  { value: "Lateral", label: "Cristal lateral" },
+    93→  { value: "Trasero", label: "Vidrio trasero" },
+    94→  { value: "Espejo", label: "Espejo lateral" },
+    95→];
+    96→
+    97→const brands = [
+    98→  "Honda","Toyota","Ford","Chevrolet","Nissan","BMW","Mercedes-Benz","Audi",
+    99→  "Hyundai","Kia","Mazda","Subaru","Volkswagen","Lexus","Jeep","RAM","Tesla",
+   100→  "Acura","Infiniti","Volvo","Mitsubishi","Buick","Cadillac","Chevy","GMC",
+   101→  "Otra",
+   102→];
+   103→
+   104→const years = Array.from({ length: 2025 - 1990 + 1 }, (_, i) => String(2025 - i));
+   105→
+   106→export default function BookingForm() {
+   107→  const { toast } = useToast();
+   108→  const [step, setStep] = useState(1);
+   109→  const [submitting, setSubmitting] = useState(false);
+   110→  const [done, setDone] = useState<null | { whatsappUrl: string; data: FormData }>(null);
+   111→  const [showConfetti, setShowConfetti] = useState(false);
+   112→  const [errors, setErrors] = useState<Record<string, string>>({});
+   113→  const fileRef = useRef<HTMLInputElement>(null);
+   114→
+   115→  const [data, setData] = useState<FormData>({
+   116→    brand: "",
+   117→    model: "",
+   118→    year: "",
+   119→    glassType: "",
+   120→    hasInsurance: false,
+   121→    photo: null,
+   122→    when: "",
+   123→    where: "",
+   124→    address: "",
+   125→    serviceDate: "",
+   126→    serviceTime: "",
+   127→    name: "",
+   128→    phone: "",
+   129→    email: "",
+   130→    notes: "",
+   131→  });
+   132→
+   133→  const dates = useMemo(() => nextDates(8), []);
+   134→
+   135→  const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
+   136→    setData((p) => ({ ...p, [k]: v }));
+   137→
+   138→  const validateStep = (s: number): boolean => {
+   139→    const e: Record<string, string> = {};
+   140→    if (s === 1) {
+   141→      if (!data.brand) e.brand = "Selecciona la marca.";
+   142→      if (!data.model.trim()) e.model = "Escribe el modelo.";
+   143→      if (!data.year) e.year = "Selecciona el año.";
+   144→    }
+   145→    if (s === 2) {
+   146→      if (!data.glassType) e.glassType = "Selecciona el tipo de vidrio.";
+   147→      if (data.photo && data.photo.size > 5 * 1024 * 1024) {
+   148→        e.photo = "La foto no puede pesar más de 5MB.";
+   149→      }
+   150→    }
+   151→    if (s === 3) {
+   152→      if (!data.when) e.when = "Indica cuándo lo necesitas.";
+   153→      if (!data.where) e.where = "Indica dónde.";
+   154→      if (data.where === "Casa" || data.where === "Trabajo") {
+   155→        if (!data.address.trim()) e.address = "Escribe tu dirección.";
+   156→      }
+   157→    }
+   158→    if (s === 4) {
+   159→      if (!data.serviceDate) e.serviceDate = "Elige una fecha.";
+   160→      if (!data.serviceTime) e.serviceTime = "Elige una franja horaria.";
+   161→    }
+   162→    if (s === 5) {
+   163→      if (!data.name.trim()) e.name = "Escribe tu nombre.";
+   164→      const phoneDigits = data.phone.replace(/\D/g, "");
+   165→      if (phoneDigits.length !== 10) e.phone = "Teléfono inválido (10 dígitos).";
+   166→    }
+   167→    setErrors(e);
+   168→    return Object.keys(e).length === 0;
+   169→  };
+   170→
+   171→  const next = () => {
+   172→    if (!validateStep(step)) return;
+   173→    if (step < 5) setStep(step + 1);
+   174→  };
+   175→  const back = () => step > 1 && setStep(step - 1);
+   176→
+   177→  const submit = async () => {
+   178→    if (!validateStep(5)) return;
+   179→    setSubmitting(true);
+   180→    try {
+   181→      const fd = new FormData();
+   182→      fd.append("name", data.name);
+   183→      fd.append("phone", data.phone);
+   184→      fd.append("email", data.email);
+   185→      fd.append("brand", data.brand);
+   186→      fd.append("model", data.model);
+   187→      fd.append("year", data.year);
+   188→      fd.append("glassType", data.glassType);
+   189→      fd.append("hasInsurance", String(data.hasInsurance));
+   190→      if (data.photo) fd.append("photo", data.photo);
+   191→      fd.append("serviceDate", data.serviceDate);
+   192→      fd.append("serviceTime", data.serviceTime);
+   193→      fd.append("location", data.where);
+   194→      fd.append("address", data.address);
+   195→      fd.append("notes", data.notes);
+   196→
+   197→      const res = await fetch("/api/appointments", { method: "POST", body: fd });
+   198→      const json = await res.json();
+   199→      if (!res.ok || !json.success) {
+   200→        throw new Error(json.error || "No pudimos enviar tu cita.");
+   201→      }
+   202→      setShowConfetti(true);
+   203→      setTimeout(() => setShowConfetti(false), 3200);
+   204→      setDone({ whatsappUrl: json.whatsappUrl, data });
+   205→      toast({
+   206→        title: "¡Cita agendada! 🎉",
+   207→        description: "Te contactaremos en menos de 15 min.",
+   208→      });
+   209→    } catch (err) {
+   210→      const msg = err instanceof Error ? err.message : "Error desconocido";
+   211→      toast({
+   212→        title: "No se pudo agendar",
+   213→        description: msg,
+   214→        variant: "destructive",
+   215→      });
+   216→    } finally {
+   217→      setSubmitting(false);
+   218→    }
+   219→  };
+   220→
+   221→  const progress = (step / 5) * 100;
+   222→
+   223→  return (
+   224→    <section
+   225→      id="agendar"
+   226→      aria-labelledby="booking-heading"
+   227→      className="bg-vv-cream py-16 md:py-24 relative overflow-hidden"
+   228→    >
+   229→      {showConfetti && <Confetti />}
+   230→      <div className="mx-auto max-w-3xl px-4 md:px-6">
+   231→        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
+   232→          <p className="kicker text-vv-yellow-deep mb-3">Cotización Gratis</p>
+   233→          <h2
+   234→            id="booking-heading"
+   235→            className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
+   236→          >
+   237→            Agenda tu cita en <span className="text-gradient-yellow">2 minutos</span>
+   238→          </h2>
+   239→          <p className="mt-3 text-vv-black/70 text-sm md:text-base">
+   240→            Sin compromiso · Respuesta en 15 min · Cotización exacta
+   241→          </p>
+   242→        </div>
+   243→
+   244→        <div className="bg-white rounded-3xl shadow-xl border border-black/5 overflow-hidden">
+   245→          {/* Progress */}
+   246→          {!done && (
+   247→            <div className="px-5 md:px-8 pt-6 md:pt-8">
+   248→              <div className="flex items-center justify-between mb-2">
+   249→                <span className="text-xs font-semibold text-vv-black/60">
+   250→                  Paso {step} de 5
+   251→                </span>
+   252→                <span className="text-xs text-vv-black/50 flex items-center gap-1">
+   253→                  <Clock className="h-3 w-3" /> Toma 2 minutos
+   254→                </span>
+   255→              </div>
+   256→              <div className="h-2 bg-black/10 rounded-full overflow-hidden mb-5">
+   257→                <motion.div
+   258→                  className="h-full bg-gradient-to-r from-vv-yellow to-vv-yellow-deep rounded-full"
+   259→                  initial={{ width: 0 }}
+   260→                  animate={{ width: `${progress}%` }}
+   261→                  transition={{ duration: 0.4 }}
+   262→                />
+   263→              </div>
+   264→              <div className="flex items-center justify-between mb-6">
+   265→                {STEPS.map((s) => {
+   266→                  const active = step === s.id;
+   267→                  const complete = step > s.id;
+   268→                  return (
+   269→                    <div key={s.id} className="flex flex-col items-center gap-1 flex-1">
+   270→                      <div
+   271→                        className={`h-9 w-9 rounded-full grid place-items-center text-xs font-bold transition-colors ${
+   272→                          complete
+   273→                            ? "bg-vv-green text-white"
+   274→                            : active
+   275→                            ? "bg-vv-yellow text-vv-black ring-4 ring-vv-yellow/30"
+   276→                            : "bg-black/10 text-vv-black/50"
+   277→                        }`}
+   278→                      >
+   279→                        {complete ? <CheckCircle2 className="h-5 w-5" /> : s.id}
+   280→                      </div>
+   281→                      <span
+   282→                        className={`text-[10px] md:text-xs font-medium ${
+   283→                          active || complete ? "text-vv-black" : "text-vv-black/50"
+   284→                        }`}
+   285→                      >
+   286→                        {s.label}
+   287→                      </span>
+   288→                    </div>
+   289→                  );
+   290→                })}
+   291→              </div>
+   292→              <div className="mb-4 text-sm text-vv-black/70 font-medium bg-vv-yellow/10 border border-vv-yellow/30 rounded-lg px-3 py-2">
+   293→                {ENCOURAGE[step]}
+   294→              </div>
+   295→            </div>
+   296→          )}
+   297→
+   298→          <div className="px-5 md:px-8 pb-8">
+   299→            <AnimatePresence mode="wait">
+   300→              {done ? (
+   301→                <Confirmation data={done.data} whatsappUrl={done.whatsappUrl} />
+   302→              ) : (
+   303→                <motion.div
+   304→                  key={step}
+   305→                  initial={{ opacity: 0, x: 20 }}
+   306→                  animate={{ opacity: 1, x: 0 }}
+   307→                  exit={{ opacity: 0, x: -20 }}
+   308→                  transition={{ duration: 0.25 }}
+   309→                >
+   310→                  {/* STEP 1 */}
+   311→                  {step === 1 && (
+   312→                    <div className="space-y-5">
+   313→                      <StepHeader
+   314→                        icon={Car}
+   315→                        title="Cuéntanos de tu vehículo"
+   316→                        subtitle="Para darte un precio exacto, necesitamos marca, modelo y año."
+   317→                      />
+   318→                      <div className="grid sm:grid-cols-2 gap-4">
+   319→                        <div>
+   320→                          <Label htmlFor="brand">Marca *</Label>
+   321→                          <Select
+   322→                            value={data.brand}
+   323→                            onValueChange={(v) => set("brand", v)}
+   324→                          >
+   325→                            <SelectTrigger id="brand" className="mt-1.5 h-12">
+   326→                              <SelectValue placeholder="Selecciona la marca" />
+   327→                            </SelectTrigger>
+   328→                            <SelectContent className="max-h-72 vv-scroll">
+   329→                              {brands.map((b) => (
+   330→                                <SelectItem key={b} value={b}>
+   331→                                  {b}
+   332→                                </SelectItem>
+   333→                              ))}
+   334→                            </SelectContent>
+   335→                          </Select>
+   336→                          <FieldErr msg={errors.brand} />
+   337→                        </div>
+   338→                        <div>
+   339→                          <Label htmlFor="model">Modelo *</Label>
+   340→                          <Input
+   341→                            id="model"
+   342→                            placeholder="Ej. Camry, Civic, F-150"
+   343→                            value={data.model}
+   344→                            onChange={(e) => set("model", e.target.value)}
+   345→                            className="mt-1.5 h-12"
+   346→                          />
+   347→                          <FieldErr msg={errors.model} />
+   348→                        </div>
+   349→                        <div className="sm:col-span-2">
+   350→                          <Label htmlFor="year">Año *</Label>
+   351→                          <Select
+   352→                            value={data.year}
+   353→                            onValueChange={(v) => set("year", v)}
+   354→                          >
+   355→                            <SelectTrigger id="year" className="mt-1.5 h-12">
+   356→                              <SelectValue placeholder="Selecciona el año" />
+   357→                            </SelectTrigger>
+   358→                            <SelectContent className="max-h-72 vv-scroll">
+   359→                              {years.map((y) => (
+   360→                                <SelectItem key={y} value={y}>
+   361→                                  {y}
+   362→                                </SelectItem>
+   363→                              ))}
+   364→                            </SelectContent>
+   365→                          </Select>
+   366→                          <FieldErr msg={errors.year} />
+   367→                        </div>
+   368→                      </div>
+   369→                    </div>
+   370→                  )}
+   371→
+   372→                  {/* STEP 2 */}
+   373→                  {step === 2 && (
+   374→                    <div className="space-y-5">
+   375→                      <StepHeader
+   376→                        icon={Camera}
+   377→                        title="Sobre el daño"
+   378→                        subtitle="¿Qué vidrio necesitas? Una foto nos ayuda a cotizar mejor."
+   379→                      />
+   380→                      <div>
+   381→                        <Label>Tipo de vidrio *</Label>
+   382→                        <div className="grid grid-cols-2 gap-2 mt-2">
+   383→                          {glassTypes.map((g) => (
+   384→                            <button
+   385→                              key={g.value}
+   386→                              type="button"
+   387→                              onClick={() => set("glassType", g.value)}
+   388→                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+   389→                                data.glassType === g.value
+   390→                                  ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
+   391→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   392→                              }`}
+   393→                            >
+   394→                              {g.label}
+   395→                            </button>
+   396→                          ))}
+   397→                        </div>
+   398→                        <FieldErr msg={errors.glassType} />
+   399→                      </div>
+   400→
+   401→                      <div>
+   402→                        <Label>¿Tienes seguro?</Label>
+   403→                        <div className="grid grid-cols-2 gap-2 mt-2">
+   404→                          {[
+   405→                            { v: true, label: "✓ Sí, tengo seguro" },
+   406→                            { v: false, label: "✗ No tengo" },
+   407→                          ].map((o) => (
+   408→                            <button
+   409→                              key={String(o.v)}
+   410→                              type="button"
+   411→                              onClick={() => set("hasInsurance", o.v)}
+   412→                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+   413→                                data.hasInsurance === o.v
+   414→                                  ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
+   415→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   416→                              }`}
+   417→                            >
+   418→                              {o.label}
+   419→                            </button>
+   420→                          ))}
+   421→                        </div>
+   422→                        {data.hasInsurance && (
+   423→                          <p className="mt-2 text-xs text-vv-black/60 flex items-center gap-1">
+   424→                            <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
+   425→                            Tramitamos el reclamo con tu aseguradora por ti.
+   426→                          </p>
+   427→                        )}
+   428→                      </div>
+   429→
+   430→                      <div>
+   431→                        <Label>Foto del daño (opcional)</Label>
+   432→                        <input
+   433→                          ref={fileRef}
+   434→                          type="file"
+   435→                          accept="image/*"
+   436→                          className="hidden"
+   437→                          onChange={(e) => {
+   438→                            const f = e.target.files?.[0];
+   439→                            if (f) set("photo", f);
+   440→                          }}
+   441→                        />
+   442→                        {!data.photo ? (
+   443→                          <button
+   444→                            type="button"
+   445→                            onClick={() => fileRef.current?.click()}
+   446→                            className="mt-2 w-full h-28 rounded-xl border-2 border-dashed border-black/15 hover:border-vv-yellow bg-vv-cream/50 flex flex-col items-center justify-center gap-1 text-vv-black/60"
+   447→                          >
+   448→                            <Upload className="h-6 w-6 text-vv-yellow-deep" />
+   449→                            <span className="text-sm font-medium">
+   450→                              Toca para subir foto
+   451→                            </span>
+   452→                            <span className="text-[11px] text-vv-black/50">
+   453→                              JPG, PNG · Máx 5MB
+   454→                            </span>
+   455→                          </button>
+   456→                        ) : (
+   457→                          <div className="mt-2 relative rounded-xl overflow-hidden border border-black/10">
+   458→                            <img
+   459→                              src={URL.createObjectURL(data.photo)}
+   460→                              alt="Foto del daño"
+   461→                              className="w-full h-40 object-cover"
+   462→                            />
+   463→                            <button
+   464→                              type="button"
+   465→                              onClick={() => set("photo", null)}
+   466→                              className="absolute top-2 right-2 bg-vv-black/80 text-white rounded-full p-1.5 hover:bg-vv-black"
+   467→                              aria-label="Quitar foto"
+   468→                            >
+   469→                              <X className="h-4 w-4" />
+   470→                            </button>
+   471→                          </div>
+   472→                        )}
+   473→                        <FieldErr msg={errors.photo} />
+   474→                      </div>
+   475→                    </div>
+   476→                  )}
+   477→
+   478→                  {/* STEP 3 */}
+   479→                  {step === 3 && (
+   480→                    <div className="space-y-5">
+   481→                      <StepHeader
+   482→                        icon={Settings2}
+   483→                        title="¿Cuándo y dónde?"
+   484→                        subtitle="Elige la urgencia y el lugar del servicio."
+   485→                      />
+   486→                      <div>
+   487→                        <Label>¿Cuándo lo necesitas? *</Label>
+   488→                        <div className="grid grid-cols-3 gap-2 mt-2">
+   489→                          {[
+   490→                            { v: "Hoy", label: "🔥 Hoy" },
+   491→                            { v: "Mañana", label: "Mañana" },
+   492→                            { v: "Esta semana", label: "Esta semana" },
+   493→                          ].map((o) => (
+   494→                            <button
+   495→                              key={o.v}
+   496→                              type="button"
+   497→                              onClick={() => set("when", o.v)}
+   498→                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+   499→                                data.when === o.v
+   500→                                  ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
+   501→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   502→                              }`}
+   503→                            >
+   504→                              {o.label}
+   505→                            </button>
+   506→                          ))}
+   507→                        </div>
+   508→                        <FieldErr msg={errors.when} />
+   509→                      </div>
+   510→
+   511→                      <div>
+   512→                        <Label>¿Dónde? *</Label>
+   513→                        <RadioGroup
+   514→                          value={data.where}
+   515→                          onValueChange={(v) => set("where", v)}
+   516→                          className="grid grid-cols-3 gap-2 mt-2"
+   517→                        >
+   518→                          {[
+   519→                            { v: "Taller", label: "Taller" },
+   520→                            { v: "Casa", label: "Mi casa" },
+   521→                            { v: "Trabajo", label: "Mi trabajo" },
+   522→                          ].map((o) => (
+   523→                            <label
+   524→                              key={o.v}
+   525→                              htmlFor={`where-${o.v}`}
+   526→                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+   527→                                data.where === o.v
+   528→                                  ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
+   529→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   530→                              }`}
+   531→                            >
+   532→                              <RadioGroupItem
+   533→                                id={`where-${o.v}`}
+   534→                                value={o.v}
+   535→                                className="sr-only"
+   536→                              />
+   537→                              {o.label}
+   538→                            </label>
+   539→                          ))}
+   540→                        </RadioGroup>
+   541→                        <FieldErr msg={errors.where} />
+   542→                      </div>
+   543→
+   544→                      {(data.where === "Casa" || data.where === "Trabajo") && (
+   545→                        <div>
+   546→                          <Label htmlFor="address">
+   547→                            Dirección (servicio móvil) *
+   548→                          </Label>
+   549→                          <Input
+   550→                            id="address"
+   551→                            placeholder="Ej. 1234 Main St, San Diego, CA 92101"
+   552→                            value={data.address}
+   553→                            onChange={(e) => set("address", e.target.value)}
+   554→                            className="mt-1.5 h-12"
+   555→                          />
+   556→                          <p className="mt-1 text-[11px] text-vv-black/60 flex items-center gap-1">
+   557→                            <Sparkles className="h-3 w-3 text-vv-yellow-deep" />
+   558→                            Sin costo extra en la mayoría de zonas de San Diego.
+   559→                          </p>
+   560→                          <FieldErr msg={errors.address} />
+   561→                        </div>
+   562→                      )}
+   563→                    </div>
+   564→                  )}
+   565→
+   566→                  {/* STEP 4 */}
+   567→                  {step === 4 && (
+   568→                    <div className="space-y-5">
+   569→                      <StepHeader
+   570→                        icon={CalendarClock}
+   571→                        title="Elige fecha y hora"
+   572→                        subtitle="Solo mostramos días con disponibilidad real."
+   573→                      />
+   574→
+   575→                      <div className="flex items-center gap-2 bg-vv-yellow/15 border border-vv-yellow/40 rounded-lg px-3 py-2 mb-2">
+   576→                        <span className="text-xs font-semibold text-vv-black">
+   577→                          🔥 Solo 3 citas disponibles hoy. Reserva la tuya.
+   578→                        </span>
+   579→                      </div>
+   580→
+   581→                      <div>
+   582→                        <Label>Fecha *</Label>
+   583→                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mt-2">
+   584→                          {dates.map((d) => (
+   585→                            <button
+   586→                              key={d.iso}
+   587→                              type="button"
+   588→                              onClick={() => set("serviceDate", d.iso)}
+   589→                              className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center transition-all ${
+   590→                                data.serviceDate === d.iso
+   591→                                  ? "border-vv-yellow bg-vv-yellow text-vv-black"
+   592→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   593→                              }`}
+   594→                            >
+   595→                              <span className="text-[10px] uppercase font-medium">
+   596→                                {d.weekday.replace(".", "")}
+   597→                              </span>
+   598→                              <span className="text-lg font-extrabold leading-none">
+   599→                                {d.day}
+   600→                              </span>
+   601→                              <span className="text-[10px] uppercase">
+   602→                                {d.month.replace(".", "")}
+   603→                              </span>
+   604→                            </button>
+   605→                          ))}
+   606→                        </div>
+   607→                        <FieldErr msg={errors.serviceDate} />
+   608→                      </div>
+   609→
+   610→                      <div>
+   611→                        <Label>Franja horaria *</Label>
+   612→                        <div className="grid grid-cols-2 gap-2 mt-2">
+   613→                          {[
+   614→                            { v: "Mañana (8am–12pm)", label: "🌅 Mañana (8am–12pm)" },
+   615→                            { v: "Tarde (12pm–6pm)", label: "☀️ Tarde (12pm–6pm)" },
+   616→                          ].map((o) => (
+   617→                            <button
+   618→                              key={o.v}
+   619→                              type="button"
+   620→                              onClick={() => set("serviceTime", o.v)}
+   621→                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+   622→                                data.serviceTime === o.v
+   623→                                  ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
+   624→                                  : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
+   625→                              }`}
+   626→                            >
+   627→                              {o.label}
+   628→                            </button>
+   629→                          ))}
+   630→                        </div>
+   631→                        <FieldErr msg={errors.serviceTime} />
+   632→                      </div>
+   633→
+   634→                      <p className="text-[11px] text-vv-black/55 flex items-center gap-1">
+   635→                        <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
+   636→                        Te confirmamos por WhatsApp en 15 min.
+   637→                      </p>
+   638→                    </div>
+   639→                  )}
+   640→
+   641→                  {/* STEP 5 */}
+   642→                  {step === 5 && (
+   643→                    <div className="space-y-5">
+   644→                      <StepHeader
+   645→                        icon={User}
+   646→                        title="¿Cómo te contactamos?"
+   647→                        subtitle="Último paso. Te llamaremos o escribiremos en 15 minutos."
+   648→                      />
+   649→                      <div>
+   650→                        <Label htmlFor="name">Nombre completo *</Label>
+   651→                        <Input
+   652→                          id="name"
+   653→                          placeholder="Ej. Juan Pérez"
+   654→                          value={data.name}
+   655→                          onChange={(e) => set("name", e.target.value)}
+   656→                          className="mt-1.5 h-12"
+   657→                        />
+   658→                        <FieldErr msg={errors.name} />
+   659→                      </div>
+   660→                      <div>
+   661→                        <Label htmlFor="phone">Teléfono *</Label>
+   662→                        <Input
+   663→                          id="phone"
+   664→                          type="tel"
+   665→                          inputMode="tel"
+   666→                          placeholder="(619) 555-0199"
+   667→                          value={data.phone}
+   668→                          onChange={(e) => set("phone", formatPhone(e.target.value))}
+   669→                          className="mt-1.5 h-12"
+   670→                        />
+   671→                        <p className="mt-1 text-[11px] text-vv-black/55">
+   672→                          📲 Te llamaremos o escribiremos por WhatsApp.
+   673→                        </p>
+   674→                        <FieldErr msg={errors.phone} />
+   675→                      </div>
+   676→                      <div>
+   677→                        <Label htmlFor="email">Email (opcional)</Label>
+   678→                        <Input
+   679→                          id="email"
+   680→                          type="email"
+   681→                          placeholder="tucorreo@ejemplo.com"
+   682→                          value={data.email}
+   683→                          onChange={(e) => set("email", e.target.value)}
+   684→                          className="mt-1.5 h-12"
+   685→                        />
+   686→                      </div>
+   687→                      <div>
+   688→                        <Label htmlFor="notes">Notas (opcional)</Label>
+   689→                        <Textarea
+   690→                          id="notes"
+   691→                          placeholder="Cuéntanos detalles del daño, color del auto, sensor de lluvia, etc."
+   692→                          value={data.notes}
+   693→                          onChange={(e) => set("notes", e.target.value)}
+   694→                          className="mt-1.5 min-h-[80px]"
+   695→                        />
+   696→                      </div>
+   697→
+   698→                      <div className="flex items-center gap-2 text-[11px] text-vv-black/55 bg-vv-cream rounded-lg px-3 py-2">
+   699→                        <ShieldCheck className="h-4 w-4 text-vv-green shrink-0" />
+   700→                        🔒 Tu información está segura. No la compartimos con
+   701→                        terceros.
+   702→                      </div>
+   703→                    </div>
+   704→                  )}
+   705→                </motion.div>
+   706→              )}
+   707→            </AnimatePresence>
+   708→
+   709→            {/* Nav buttons */}
+   710→            {!done && (
+   711→              <div className="flex items-center justify-between gap-3 mt-8 pt-5 border-t border-black/5">
+   712→                <Button
+   713→                  type="button"
+   714→                  variant="ghost"
+   715→                  onClick={back}
+   716→                  disabled={step === 1 || submitting}
+   717→                  className="text-vv-black/70 hover:text-vv-black hover:bg-black/5 h-12"
+   718→                >
+   719→                  <ChevronLeft className="h-4 w-4 mr-1" />
+   720→                  Atrás
+   721→                </Button>
+   722→                {step < 5 ? (
+   723→                  <Button
+   724→                    type="button"
+   725→                    onClick={next}
+   726→                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-6"
+   727→                  >
+   728→                    Continuar
+   729→                    <ChevronRight className="h-4 w-4 ml-1" />
+   730→                  </Button>
+   731→                ) : (
+   732→                  <Button
+   733→                    type="button"
+   734→                    onClick={submit}
+   735→                    disabled={submitting}
+   736→                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-6 pulse-yellow-glow"
+   737→                  >
+   738→                    {submitting ? (
+   739→                      <>
+   740→                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+   741→                        Enviando…
+   742→                      </>
+   743→                    ) : (
+   744→                      <>
+   745→                        <CheckCircle2 className="h-4 w-4 mr-2" />
+   746→                        Agendar Cita Gratis
+   747→                      </>
+   748→                    )}
+   749→                  </Button>
+   750→                )}
+   751→              </div>
+   752→            )}
+   753→          </div>
+   754→        </div>
+   755→
+   756→        {!done && (
+   757→          <p className="mt-4 text-center text-xs text-vv-black/50 flex items-center justify-center gap-1.5">
+   758→            <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
+   759→            Información segura · Sin compromiso · Cancela cuando quieras
+   760→          </p>
+   761→        )}
+   762→      </div>
+   763→    </section>
+   764→  );
+   765→}
+   766→
+   767→function StepHeader({
+   768→  icon: Icon,
+   769→  title,
+   770→  subtitle,
+   771→}: {
+   772→  icon: React.ComponentType<{ className?: string }>;
+   773→  title: string;
+   774→  subtitle: string;
+   775→}) {
+   776→  return (
+   777→    <div className="flex items-start gap-3 mb-2">
+   778→      <div className="grid place-items-center h-10 w-10 rounded-xl bg-vv-yellow/15 text-vv-yellow-deep shrink-0">
+   779→        <Icon className="h-5 w-5" />
+   780→      </div>
+   781→      <div>
+   782→        <h3 className="text-vv-black font-bold text-lg leading-tight">{title}</h3>
+   783→        <p className="text-vv-black/60 text-sm">{subtitle}</p>
+   784→      </div>
+   785→    </div>
+   786→  );
+   787→}
+   788→
+   789→function FieldErr({ msg }: { msg?: string }) {
+   790→  if (!msg) return null;
+   791→  return (
+   792→    <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+   793→      <AlertCircle className="h-3 w-3" />
+   794→      {msg}
+   795→    </p>
+   796→  );
+   797→}
+   798→
+   799→function Confirmation({
+   800→  data,
+   801→  whatsappUrl,
+   802→}: {
+   803→  data: FormData;
+   804→  whatsappUrl: string;
+   805→}) {
+   806→  const summary = [
+   807→    { label: "Vehículo", value: `${data.year} ${data.brand} ${data.model}` },
+   808→    { label: "Vidrio", value: data.glassType },
+   809→    { label: "Seguro", value: data.hasInsurance ? "Sí" : "No" },
+   810→    { label: "Fecha", value: data.serviceDate },
+   811→    { label: "Horario", value: data.serviceTime },
+   812→    { label: "Lugar", value: data.where + (data.address ? ` — ${data.address}` : "") },
+   813→    { label: "Nombre", value: data.name },
+   814→    { label: "Teléfono", value: data.phone },
+   815→  ];
+   816→
+   817→  return (
+   818→    <motion.div
+   819→      initial={{ opacity: 0, scale: 0.95 }}
+   820→      animate={{ opacity: 1, scale: 1 }}
+   821→      transition={{ duration: 0.4 }}
+   822→      className="text-center py-4"
+   823→    >
+   824→      <div className="inline-grid place-items-center h-20 w-20 rounded-full bg-vv-green text-white mb-4">
+   825→        <PartyPopper className="h-10 w-10" />
+   826→      </div>
+   827→      <h3 className="text-vv-black font-extrabold text-2xl md:text-3xl">
+   828→        ¡Cita Agendada! 🎉
+   829→      </h3>
+   830→      <p className="mt-2 text-vv-black/70 text-sm md:text-base">
+   831→        Gracias <span className="font-bold">{data.name.split(" ")[0]}</span>. Hemos
+   832→        recibido tu solicitud. <strong>Te contactaremos en 15 min</strong> para
+   833→        confirmar.
+   834→      </p>
+   835→
+   836→      <div className="mt-6 text-left bg-vv-cream rounded-2xl p-5 border border-black/5">
+   837→        <div className="text-[11px] uppercase tracking-wider text-vv-black/50 font-bold mb-3">
+   838→          Resumen de tu cita
+   839→        </div>
+   840→        <dl className="grid sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+   841→          {summary.map((s) => (
+   842→            <div key={s.label} className="flex justify-between gap-2 py-1 border-b border-black/5 last:border-0">
+   843→              <dt className="text-vv-black/60">{s.label}</dt>
+   844→              <dd className="text-vv-black font-semibold text-right">{s.value}</dd>
+   845→            </div>
+   846→          ))}
+   847→        </dl>
+   848→      </div>
+   849→
+   850→      <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+   851→        <Button asChild className="bg-vv-green text-white hover:bg-vv-green/90 font-bold h-12 px-6">
+   852→          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+   853→            <svg viewBox="0 0 32 32" className="h-5 w-5 mr-2 fill-current">
+   854→              <path d="M16.04 4c-6.6 0-12 5.36-12 11.97 0 2.11.55 4.16 1.6 5.97L4 28l6.22-1.62a11.95 11.95 0 0 0 5.82 1.49h.01c6.6 0 12-5.36 12-11.97C28.05 9.36 22.65 4 16.04 4zm5.41 13.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35z" />
+   855→            </svg>
+   856→            Enviar confirmación por WhatsApp
+   857→          </a>
+   858→        </Button>
+   859→        <Button asChild variant="outline" className="border-vv-black/30 text-vv-black hover:bg-vv-black hover:text-white bg-transparent h-12 px-6">
+   860→          <a href={`tel:${BUSINESS.phoneTel}`}>
+   861→            Llamar ahora: {BUSINESS.phoneDisplay}
+   862→          </a>
+   863→        </Button>
+   864→      </div>
+   865→
+   866→      <p className="mt-4 text-xs text-vv-black/55 flex items-center justify-center gap-1.5">
+   867→        <Clock className="h-3.5 w-3.5 text-vv-yellow-deep" />
+   868→        Te contactaremos en 15 min · Revisa tu WhatsApp
+   869→      </p>
+   870→    </motion.div>
+   871→  );
+   872→}
+   873→
+   874→function Confetti() {
+   875→  const colors = ["#FFD60A", "#FFC300", "#25D366", "#0A0A0A", "#FFFFFF"];
+   876→  const pieces = Array.from({ length: 60 });
+   877→  return (
+   878→    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+   879→      {pieces.map((_, i) => {
+   880→        const left = Math.random() * 100;
+   881→        const delay = Math.random() * 0.6;
+   882→        const color = colors[i % colors.length];
+   883→        const rotate = Math.random() * 360;
+   884→        return (
+   885→          <span
+   886→            key={i}
+   887→            className="confetti-piece"
+   888→            style={{
+   889→              left: `${left}%`,
+   890→              top: "-20px",
+   891→              background: color,
+   892→              transform: `rotate(${rotate}deg)`,
+   893→              animationDelay: `${delay}s`,
+   894→            }}
+   895→          />
+   896→        );
+   897→      })}
+   898→    </div>
+   899→  );
+   900→}
+   901→

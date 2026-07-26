@@ -1,16 +1,16 @@
 // Central business config for V&V Auto Glass
 export const BUSINESS = {
   name: "V&V Auto Glass",
-  phoneDisplay: "+1 (619) 555-0199",
-  phoneTel: "+16195550199",
-  whatsappNumber: "16190000000", // placeholder
-  whatsappDisplay: "+1 (619) 000-0000",
+  phoneDisplay: "+1 (619) 646-2759",
+  phoneTel: "+16196462759",
+  whatsappNumber: "16196462759",
+  whatsappDisplay: "+1 (619) 646-2759",
   email: "info@vvautoglass-sd.com",
-  address: "1234 Main St, San Diego, CA 92101",
+  address: "San Diego, CA 92101",
   hours: [
-    { day: "Lunes – Viernes", time: "8:00 AM – 6:00 PM" },
-    { day: "Sábado", time: "9:00 AM – 4:00 PM" },
-    { day: "Domingo", time: "Cerrado (solo emergencias)" },
+    { day: "Lunes – Viernes", dayEn: "Mon – Fri", time: "8:00 AM – 6:00 PM" },
+    { day: "Sábado", dayEn: "Saturday", time: "9:00 AM – 4:00 PM" },
+    { day: "Domingo", dayEn: "Sunday", time: "Cerrado (solo emergencias)", timeEn: "Closed (emergencies only)" },
   ],
   license: "Lic. #CA-AG-12345",
   serviceAreas: [

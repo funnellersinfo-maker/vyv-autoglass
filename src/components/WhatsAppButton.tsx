@@ -4,17 +4,19 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { BUSINESS, whatsappLink } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 
 export default function WhatsAppButton() {
+  const { t } = useI18n();
   const [tip, setTip] = useState(false);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 800);
+    const t1 = setTimeout(() => setShow(true), 800);
     const tipShow = setTimeout(() => setTip(true), 2500);
     const tipHide = setTimeout(() => setTip(false), 8500);
     return () => {
-      clearTimeout(t);
+      clearTimeout(t1);
       clearTimeout(tipShow);
       clearTimeout(tipHide);
     };
@@ -27,7 +29,7 @@ export default function WhatsAppButton() {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0, opacity: 0 }}
-          className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+          className="fixed bottom-20 right-3 md:bottom-6 md:right-6 z-40 flex flex-col items-end gap-2"
         >
           <AnimatePresence>
             {tip && (
@@ -35,7 +37,7 @@ export default function WhatsAppButton() {
                 initial={{ opacity: 0, y: 10, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                className="relative mb-1 max-w-[240px] bg-white text-vv-black text-sm font-medium rounded-2xl rounded-br-none px-4 py-3 shadow-xl border border-black/5"
+                className="relative mb-1 max-w-[220px] md:max-w-[240px] bg-white text-vv-black text-sm font-medium rounded-2xl rounded-br-none px-4 py-3 shadow-xl border border-black/5"
               >
                 <button
                   aria-label="Cerrar"
@@ -44,10 +46,10 @@ export default function WhatsAppButton() {
                 >
                   <X className="h-3 w-3" />
                 </button>
-                <span className="font-bold text-vv-black">Escríbenos por WhatsApp</span>
+                <span className="font-bold text-vv-black">{t("wa.tip.title")}</span>
                 <br />
                 <span className="text-vv-black/70 text-xs">
-                  Respuesta inmediata · Cotización gratis
+                  {t("wa.tip.body")}
                 </span>
               </motion.div>
             )}
@@ -59,7 +61,7 @@ export default function WhatsAppButton() {
             )}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Escríbenos por WhatsApp"
+            aria-label={t("wa.tip.title")}
             className="relative grid place-items-center h-14 w-14 md:h-16 md:w-16 rounded-full bg-vv-green text-white shadow-2xl pulse-whatsapp hover:scale-105 transition-transform"
           >
             <svg

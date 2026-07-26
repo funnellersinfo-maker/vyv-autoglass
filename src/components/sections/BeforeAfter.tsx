@@ -4,53 +4,45 @@ import { useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MoveHorizontal, Clock, Quote } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Pair = {
   before: string;
   after: string;
-  vehicle: string;
-  service: string;
-  timeSaved: string;
-  quote: string;
+  vehicleKey: string;
 };
 
+// Curated pairs: real photos of cars with broken glass (before)
+// vs the same type of car with intact glass (after).
 const pairs: Pair[] = [
   {
+    // Cracked windshield (before) → clean windshield (after)
+    before:
+      "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=80&auto=format&fit=crop",
+    after:
+      "https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80&auto=format&fit=crop",
+    vehicleKey: "ba.p1",
+  },
+  {
+    // Broken side window / vandalism (before) → intact car (after)
     before:
       "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=1200&q=80&auto=format&fit=crop",
     after:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80&auto=format&fit=crop",
-    vehicle: "Toyota Camry 2019",
-    service: "Reemplazo de parabrisas",
-    timeSaved: "Atendido en 1h 20min",
-    quote:
-      "Llegué con el parabrisas estallado y salí manejarando. Servicio impecable.",
+      "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=80&auto=format&fit=crop",
+    vehicleKey: "ba.p2",
   },
   {
+    // Shattered back glass (before) → clean truck (after)
     before:
       "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=1200&q=80&auto=format&fit=crop",
     after:
       "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80&auto=format&fit=crop",
-    vehicle: "Honda Civic 2021",
-    service: "Cristal lateral por vandalismo",
-    timeSaved: "Mismo día · 2h total",
-    quote:
-      "Me robaron la ventana en la noche. V&V la cambió en mi trabajo al día siguiente.",
-  },
-  {
-    before:
-      "https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80&auto=format&fit=crop",
-    after:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80&auto=format&fit=crop",
-    vehicle: "Ford F-150 2018",
-    service: "Reemplazo de vidrio trasero",
-    timeSaved: "Servicio móvil · 1h 45min",
-    quote:
-      "El técnico vino a mi casa. Trabajo limpio, sellado perfecto, sin fugas.",
+    vehicleKey: "ba.p3",
   },
 ];
 
 function Slider({ pair }: { pair: Pair }) {
+  const { t } = useI18n();
   const [pos, setPos] = useState(50);
   const ref = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -61,6 +53,11 @@ function Slider({ pair }: { pair: Pair }) {
     const x = ((clientX - rect.left) / rect.width) * 100;
     setPos(Math.max(0, Math.min(100, x)));
   }, []);
+
+  const vehicle = t(`${pair.vehicleKey}.v`);
+  const service = t(`${pair.vehicleKey}.s`);
+  const timeSaved = t(`${pair.vehicleKey}.t`);
+  const quote = t(`${pair.vehicleKey}.q`);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-black/5 shadow-sm">
@@ -84,14 +81,14 @@ function Slider({ pair }: { pair: Pair }) {
         {/* AFTER (base layer) */}
         <Image
           src={pair.after}
-          alt={`Después — ${pair.vehicle}`}
+          alt={`${t("ba.after")} — ${vehicle}`}
           fill
           loading="lazy"
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover pointer-events-none"
         />
         <span className="absolute top-3 right-3 bg-vv-green text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md z-10">
-          Después
+          {t("ba.after")}
         </span>
 
         {/* BEFORE (clipped overlay via clip-path) */}
@@ -101,14 +98,14 @@ function Slider({ pair }: { pair: Pair }) {
         >
           <Image
             src={pair.before}
-            alt={`Antes — ${pair.vehicle}`}
+            alt={`${t("ba.before")} — ${vehicle}`}
             fill
             loading="lazy"
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
           />
           <span className="absolute top-3 left-3 bg-vv-black text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md">
-            Antes
+            {t("ba.before")}
           </span>
         </div>
 
@@ -127,17 +124,17 @@ function Slider({ pair }: { pair: Pair }) {
       <div className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
-            <div className="text-vv-black font-bold text-base">{pair.vehicle}</div>
-            <div className="text-vv-black/60 text-xs">{pair.service}</div>
+            <div className="text-vv-black font-bold text-base">{vehicle}</div>
+            <div className="text-vv-black/60 text-xs">{service}</div>
           </div>
           <div className="inline-flex items-center gap-1 bg-vv-yellow/15 text-vv-black text-[11px] font-semibold rounded-full px-2.5 py-1">
             <Clock className="h-3 w-3 text-vv-yellow-deep" />
-            {pair.timeSaved}
+            {timeSaved}
           </div>
         </div>
         <p className="flex items-start gap-2 text-vv-black/75 text-sm">
           <Quote className="h-4 w-4 text-vv-yellow-deep shrink-0 mt-0.5" />
-          {pair.quote}
+          {quote}
         </p>
       </div>
     </div>
@@ -145,6 +142,7 @@ function Slider({ pair }: { pair: Pair }) {
 }
 
 export default function BeforeAfter() {
+  const { t } = useI18n();
   return (
     <section
       id="antes-despues"
@@ -161,24 +159,23 @@ export default function BeforeAfter() {
       />
       <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-          <p className="kicker text-vv-yellow mb-3">Resultados Reales</p>
+          <p className="kicker text-vv-yellow mb-3">{t("ba.kicker")}</p>
           <h2
             id="ba-heading"
             className="text-white font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            Resultados Reales.{" "}
-            <span className="text-gradient-yellow">Antes y Después.</span>
+            {t("ba.title.a")}{" "}
+            <span className="text-gradient-yellow">{t("ba.title.b")}</span>
           </h2>
           <p className="mt-4 text-white/70 text-base md:text-lg">
-            Arrastra el control amarillo para ver la transformación. Esto es lo
-            que pasa cuando llamas a V&amp;V Auto Glass.
+            {t("ba.sub")}
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
           {pairs.map((p, i) => (
             <motion.div
-              key={p.vehicle}
+              key={p.vehicleKey}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}

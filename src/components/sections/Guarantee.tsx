@@ -2,26 +2,18 @@
 
 import { motion } from "framer-motion";
 import { ShieldCheck, BadgeCheck, Award, Wrench, Sparkles, Undo2 } from "lucide-react";
-
-const pillars = [
-  {
-    icon: BadgeCheck,
-    title: "Garantía Escrita",
-    desc: "Todo respaldado por escrito en tu factura. Sin letra pequeña.",
-  },
-  {
-    icon: Wrench,
-    title: "Técnicos Certificados",
-    desc: "Capacitados en ADAS, sensores y las últimas tecnologías automotrices.",
-  },
-  {
-    icon: Sparkles,
-    title: "Materiales Premium",
-    desc: "Adhesivo uretano OEM y vidrios que cumplen estándares federales.",
-  },
-];
+import { useI18n } from "@/lib/i18n";
+import { BUSINESS } from "@/lib/business";
 
 export default function Guarantee() {
+  const { t } = useI18n();
+
+  const pillars = [
+    { icon: BadgeCheck, key: "p1" },
+    { icon: Wrench, key: "p2" },
+    { icon: Sparkles, key: "p3" },
+  ];
+
   return (
     <section
       aria-labelledby="guarantee-heading"
@@ -46,12 +38,12 @@ export default function Guarantee() {
           <ShieldCheck className="h-12 w-12 md:h-14 md:w-14" strokeWidth={2.2} />
         </motion.div>
 
-        <p className="kicker text-vv-yellow mb-3">Nuestra Promesa</p>
+        <p className="kicker text-vv-yellow mb-3">{t("guarantee.kicker")}</p>
         <h2
           id="guarantee-heading"
           className="text-white font-extrabold text-3xl md:text-5xl tracking-tight"
         >
-          GARANTÍA DE <span className="text-gradient-yellow">POR VIDA</span>
+          {t("guarantee.title")}
         </h2>
 
         <motion.p
@@ -61,22 +53,18 @@ export default function Guarantee() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-5 text-white/80 text-base md:text-lg max-w-3xl mx-auto leading-relaxed"
         >
-          Respaldamos cada instalación con garantía de por vida en la mano de
-          obra. Si el vidrio presenta fugas, ruidos o problemas de instalación,
-          lo corregimos sin costo. Garantía del fabricante en el vidrio también
-          incluida. Sin letra pequeña, sin excusas, sin cobros escondidos. Tu
-          tranquilidad es parte del servicio.
+          {t("guarantee.desc")}
         </motion.p>
 
         <div className="mt-6 inline-flex items-center gap-2 bg-vv-yellow/15 border border-vv-yellow/30 rounded-full px-4 py-2 text-vv-yellow text-sm font-semibold">
           <Undo2 className="h-4 w-4" />
-          Si no estás 100% satisfecho, te devolvemos tu dinero.
+          {t("guarantee.moneyback")}
         </div>
 
         <div className="mt-12 grid sm:grid-cols-3 gap-5">
           {pillars.map((p, i) => (
             <motion.div
-              key={p.title}
+              key={p.key}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -86,8 +74,12 @@ export default function Guarantee() {
               <div className="inline-grid place-items-center h-11 w-11 rounded-xl bg-vv-yellow text-vv-black mb-3">
                 <p.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-white font-bold text-base mb-1">{p.title}</h3>
-              <p className="text-white/65 text-sm leading-relaxed">{p.desc}</p>
+              <h3 className="text-white font-bold text-base mb-1">
+                {t(`guarantee.${p.key}`)}
+              </h3>
+              <p className="text-white/65 text-sm leading-relaxed">
+                {t("guarantee.desc")}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -95,15 +87,15 @@ export default function Guarantee() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-white/60 text-xs">
           <span className="inline-flex items-center gap-1.5">
             <Award className="h-4 w-4 text-vv-yellow" />
-            BBB A+ Rating
+            BBB A+
           </span>
           <span className="inline-flex items-center gap-1.5">
             <ShieldCheck className="h-4 w-4 text-vv-yellow" />
-            Lic. #CA-AG-12345
+            {BUSINESS.license}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <BadgeCheck className="h-4 w-4 text-vv-yellow" />
-            Completamente Asegurados
+            Fully Insured
           </span>
         </div>
       </div>

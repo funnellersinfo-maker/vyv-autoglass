@@ -26,7 +26,8 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { BUSINESS, whatsappLink } from "@/lib/business";
+import { BUSINESS } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 
 type FormData = {
@@ -47,22 +48,6 @@ type FormData = {
   notes: string;
 };
 
-const STEPS = [
-  { id: 1, label: "Vehículo", icon: Car },
-  { id: 2, label: "Daño", icon: Camera },
-  { id: 3, label: "Servicio", icon: Settings2 },
-  { id: 4, label: "Agenda", icon: CalendarClock },
-  { id: 5, label: "Contacto", icon: User },
-];
-
-const ENCOURAGE: Record<number, string> = {
-  1: "🚗 Empecemos. Esto toma menos de 2 minutos.",
-  2: "📸 Con una foto basta para cotizar exacto.",
-  3: "⚙️ ¡Casi listo! Dinos dónde y cuándo.",
-  4: "📅 ¡Ya casí! Solo unos datos más.",
-  5: "📞 Último paso. Te llamaremos en 15 min.",
-};
-
 function formatPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 10);
   if (digits.length === 0) return "";
@@ -71,39 +56,34 @@ function formatPhone(v: string) {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-function nextDates(count: number) {
+function nextDates(count: number, lang: "es" | "en") {
   const out: { iso: string; weekday: string; day: string; month: string }[] = [];
   const today = new Date();
+  const locale = lang === "en" ? "en-US" : "es-US";
   for (let i = 0; i < count; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     out.push({
       iso: d.toISOString().slice(0, 10),
-      weekday: d.toLocaleDateString("es-US", { weekday: "short" }),
+      weekday: d.toLocaleDateString(locale, { weekday: "short" }),
       day: String(d.getDate()),
-      month: d.toLocaleDateString("es-US", { month: "short" }),
+      month: d.toLocaleDateString(locale, { month: "short" }),
     });
   }
   return out;
 }
 
-const glassTypes = [
-  { value: "Parabrisas", label: "Parabrisas" },
-  { value: "Lateral", label: "Cristal lateral" },
-  { value: "Trasero", label: "Vidrio trasero" },
-  { value: "Espejo", label: "Espejo lateral" },
-];
-
-const brands = [
+const brandList = [
   "Honda","Toyota","Ford","Chevrolet","Nissan","BMW","Mercedes-Benz","Audi",
   "Hyundai","Kia","Mazda","Subaru","Volkswagen","Lexus","Jeep","RAM","Tesla",
   "Acura","Infiniti","Volvo","Mitsubishi","Buick","Cadillac","Chevy","GMC",
-  "Otra",
+  "Other / Otra",
 ];
 
-const years = Array.from({ length: 2025 - 1990 + 1 }, (_, i) => String(2025 - i));
+const yearList = Array.from({ length: 2025 - 1990 + 1 }, (_, i) => String(2025 - i));
 
 export default function BookingForm() {
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -113,24 +93,29 @@ export default function BookingForm() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<FormData>({
-    brand: "",
-    model: "",
-    year: "",
-    glassType: "",
-    hasInsurance: false,
-    photo: null,
-    when: "",
-    where: "",
-    address: "",
-    serviceDate: "",
-    serviceTime: "",
-    name: "",
-    phone: "",
-    email: "",
-    notes: "",
+    brand: "", model: "", year: "", glassType: "", hasInsurance: false,
+    photo: null, when: "", where: "", address: "", serviceDate: "",
+    serviceTime: "", name: "", phone: "", email: "", notes: "",
   });
 
-  const dates = useMemo(() => nextDates(8), []);
+  const dates = useMemo(() => nextDates(8, lang), [lang]);
+  const steps = [
+    { id: 1, label: lang === "en" ? "Vehicle" : "Vehículo", icon: Car },
+    { id: 2, label: lang === "en" ? "Damage" : "Daño", icon: Camera },
+    { id: 3, label: lang === "en" ? "Service" : "Servicio", icon: Settings2 },
+    { id: 4, label: lang === "en" ? "Schedule" : "Agenda", icon: CalendarClock },
+    { id: 5, label: lang === "en" ? "Contact" : "Contacto", icon: User },
+  ];
+  const encourage: Record<number, string> = {
+    1: t("book.e1"), 2: t("book.e2"), 3: t("book.e3"), 4: t("book.e4"), 5: t("book.e5"),
+  };
+
+  const glassTypes = [
+    { value: "Parabrisas", label: t("book.gt1") },
+    { value: "Lateral", label: t("book.gt2") },
+    { value: "Trasero", label: t("book.gt3") },
+    { value: "Espejo", label: t("book.gt4") },
+  ];
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((p) => ({ ...p, [k]: v }));
@@ -138,31 +123,31 @@ export default function BookingForm() {
   const validateStep = (s: number): boolean => {
     const e: Record<string, string> = {};
     if (s === 1) {
-      if (!data.brand) e.brand = "Selecciona la marca.";
-      if (!data.model.trim()) e.model = "Escribe el modelo.";
-      if (!data.year) e.year = "Selecciona el año.";
+      if (!data.brand) e.brand = t("book.err.brand");
+      if (!data.model.trim()) e.model = t("book.err.model");
+      if (!data.year) e.year = t("book.err.year");
     }
     if (s === 2) {
-      if (!data.glassType) e.glassType = "Selecciona el tipo de vidrio.";
+      if (!data.glassType) e.glassType = t("book.err.glassType");
       if (data.photo && data.photo.size > 5 * 1024 * 1024) {
-        e.photo = "La foto no puede pesar más de 5MB.";
+        e.photo = t("book.err.photo");
       }
     }
     if (s === 3) {
-      if (!data.when) e.when = "Indica cuándo lo necesitas.";
-      if (!data.where) e.where = "Indica dónde.";
+      if (!data.when) e.when = t("book.err.when");
+      if (!data.where) e.where = t("book.err.where");
       if (data.where === "Casa" || data.where === "Trabajo") {
-        if (!data.address.trim()) e.address = "Escribe tu dirección.";
+        if (!data.address.trim()) e.address = t("book.err.address");
       }
     }
     if (s === 4) {
-      if (!data.serviceDate) e.serviceDate = "Elige una fecha.";
-      if (!data.serviceTime) e.serviceTime = "Elige una franja horaria.";
+      if (!data.serviceDate) e.serviceDate = t("book.err.serviceDate");
+      if (!data.serviceTime) e.serviceTime = t("book.err.serviceTime");
     }
     if (s === 5) {
-      if (!data.name.trim()) e.name = "Escribe tu nombre.";
+      if (!data.name.trim()) e.name = t("book.err.name");
       const phoneDigits = data.phone.replace(/\D/g, "");
-      if (phoneDigits.length !== 10) e.phone = "Teléfono inválido (10 dígitos).";
+      if (phoneDigits.length !== 10) e.phone = t("book.err.phone");
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -197,19 +182,19 @@ export default function BookingForm() {
       const res = await fetch("/api/appointments", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error || "No pudimos enviar tu cita.");
+        throw new Error(json.error || "Error");
       }
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3200);
       setDone({ whatsappUrl: json.whatsappUrl, data });
       toast({
-        title: "¡Cita agendada! 🎉",
-        description: "Te contactaremos en menos de 15 min.",
+        title: t("book.toast.title"),
+        description: t("book.toast.desc"),
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error desconocido";
+      const msg = err instanceof Error ? err.message : "Error";
       toast({
-        title: "No se pudo agendar",
+        title: t("book.toast.fail"),
         description: msg,
         variant: "destructive",
       });
@@ -229,15 +214,15 @@ export default function BookingForm() {
       {showConfetti && <Confetti />}
       <div className="mx-auto max-w-3xl px-4 md:px-6">
         <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
-          <p className="kicker text-vv-yellow-deep mb-3">Cotización Gratis</p>
+          <p className="kicker text-vv-yellow-deep mb-3">{t("book.kicker")}</p>
           <h2
             id="booking-heading"
             className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            Agenda tu cita en <span className="text-gradient-yellow">2 minutos</span>
+            {t("book.title.a")}<span className="text-gradient-yellow">{t("book.title.b")}</span>
           </h2>
           <p className="mt-3 text-vv-black/70 text-sm md:text-base">
-            Sin compromiso · Respuesta en 15 min · Cotización exacta
+            {t("book.sub")}
           </p>
         </div>
 
@@ -247,10 +232,10 @@ export default function BookingForm() {
             <div className="px-5 md:px-8 pt-6 md:pt-8">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-vv-black/60">
-                  Paso {step} de 5
+                  {t("book.step")} {step} {t("book.of")}
                 </span>
                 <span className="text-xs text-vv-black/50 flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> Toma 2 minutos
+                  <Clock className="h-3 w-3" /> {t("book.takes")}
                 </span>
               </div>
               <div className="h-2 bg-black/10 rounded-full overflow-hidden mb-5">
@@ -262,13 +247,13 @@ export default function BookingForm() {
                 />
               </div>
               <div className="flex items-center justify-between mb-6">
-                {STEPS.map((s) => {
+                {steps.map((s) => {
                   const active = step === s.id;
                   const complete = step > s.id;
                   return (
-                    <div key={s.id} className="flex flex-col items-center gap-1 flex-1">
+                    <div key={s.id} className="flex flex-col items-center gap-1 flex-1 min-w-0">
                       <div
-                        className={`h-9 w-9 rounded-full grid place-items-center text-xs font-bold transition-colors ${
+                        className={`h-9 w-9 rounded-full grid place-items-center text-xs font-bold transition-colors shrink-0 ${
                           complete
                             ? "bg-vv-green text-white"
                             : active
@@ -279,7 +264,7 @@ export default function BookingForm() {
                         {complete ? <CheckCircle2 className="h-5 w-5" /> : s.id}
                       </div>
                       <span
-                        className={`text-[10px] md:text-xs font-medium ${
+                        className={`text-[10px] md:text-xs font-medium text-center leading-tight ${
                           active || complete ? "text-vv-black" : "text-vv-black/50"
                         }`}
                       >
@@ -290,7 +275,7 @@ export default function BookingForm() {
                 })}
               </div>
               <div className="mb-4 text-sm text-vv-black/70 font-medium bg-vv-yellow/10 border border-vv-yellow/30 rounded-lg px-3 py-2">
-                {ENCOURAGE[step]}
+                {encourage[step]}
               </div>
             </div>
           )}
@@ -310,36 +295,27 @@ export default function BookingForm() {
                   {/* STEP 1 */}
                   {step === 1 && (
                     <div className="space-y-5">
-                      <StepHeader
-                        icon={Car}
-                        title="Cuéntanos de tu vehículo"
-                        subtitle="Para darte un precio exacto, necesitamos marca, modelo y año."
-                      />
+                      <StepHeader icon={Car} title={t("book.step1.t")} subtitle={t("book.step1.s")} />
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="brand">Marca *</Label>
-                          <Select
-                            value={data.brand}
-                            onValueChange={(v) => set("brand", v)}
-                          >
+                          <Label htmlFor="brand">{t("book.brand")} *</Label>
+                          <Select value={data.brand} onValueChange={(v) => set("brand", v)}>
                             <SelectTrigger id="brand" className="mt-1.5 h-12">
-                              <SelectValue placeholder="Selecciona la marca" />
+                              <SelectValue placeholder={t("book.brand.ph")} />
                             </SelectTrigger>
                             <SelectContent className="max-h-72 vv-scroll">
-                              {brands.map((b) => (
-                                <SelectItem key={b} value={b}>
-                                  {b}
-                                </SelectItem>
+                              {brandList.map((b) => (
+                                <SelectItem key={b} value={b}>{b}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                           <FieldErr msg={errors.brand} />
                         </div>
                         <div>
-                          <Label htmlFor="model">Modelo *</Label>
+                          <Label htmlFor="model">{t("book.model")} *</Label>
                           <Input
                             id="model"
-                            placeholder="Ej. Camry, Civic, F-150"
+                            placeholder={t("book.model.ph")}
                             value={data.model}
                             onChange={(e) => set("model", e.target.value)}
                             className="mt-1.5 h-12"
@@ -347,19 +323,14 @@ export default function BookingForm() {
                           <FieldErr msg={errors.model} />
                         </div>
                         <div className="sm:col-span-2">
-                          <Label htmlFor="year">Año *</Label>
-                          <Select
-                            value={data.year}
-                            onValueChange={(v) => set("year", v)}
-                          >
+                          <Label htmlFor="year">{t("book.year")} *</Label>
+                          <Select value={data.year} onValueChange={(v) => set("year", v)}>
                             <SelectTrigger id="year" className="mt-1.5 h-12">
-                              <SelectValue placeholder="Selecciona el año" />
+                              <SelectValue placeholder={t("book.year.ph")} />
                             </SelectTrigger>
                             <SelectContent className="max-h-72 vv-scroll">
-                              {years.map((y) => (
-                                <SelectItem key={y} value={y}>
-                                  {y}
-                                </SelectItem>
+                              {yearList.map((y) => (
+                                <SelectItem key={y} value={y}>{y}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -372,20 +343,16 @@ export default function BookingForm() {
                   {/* STEP 2 */}
                   {step === 2 && (
                     <div className="space-y-5">
-                      <StepHeader
-                        icon={Camera}
-                        title="Sobre el daño"
-                        subtitle="¿Qué vidrio necesitas? Una foto nos ayuda a cotizar mejor."
-                      />
+                      <StepHeader icon={Camera} title={t("book.step2.t")} subtitle={t("book.step2.s")} />
                       <div>
-                        <Label>Tipo de vidrio *</Label>
+                        <Label>{t("book.glassType")} *</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {glassTypes.map((g) => (
                             <button
                               key={g.value}
                               type="button"
                               onClick={() => set("glassType", g.value)}
-                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all px-2 ${
                                 data.glassType === g.value
                                   ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
@@ -399,17 +366,17 @@ export default function BookingForm() {
                       </div>
 
                       <div>
-                        <Label>¿Tienes seguro?</Label>
+                        <Label>{t("book.insurance")}</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {[
-                            { v: true, label: "✓ Sí, tengo seguro" },
-                            { v: false, label: "✗ No tengo" },
+                            { v: true, label: t("book.yesIns") },
+                            { v: false, label: t("book.noIns") },
                           ].map((o) => (
                             <button
                               key={String(o.v)}
                               type="button"
                               onClick={() => set("hasInsurance", o.v)}
-                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all px-2 ${
                                 data.hasInsurance === o.v
                                   ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
@@ -422,13 +389,13 @@ export default function BookingForm() {
                         {data.hasInsurance && (
                           <p className="mt-2 text-xs text-vv-black/60 flex items-center gap-1">
                             <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
-                            Tramitamos el reclamo con tu aseguradora por ti.
+                            {t("book.insHelp")}
                           </p>
                         )}
                       </div>
 
                       <div>
-                        <Label>Foto del daño (opcional)</Label>
+                        <Label>{t("book.photo")}</Label>
                         <input
                           ref={fileRef}
                           type="file"
@@ -446,25 +413,21 @@ export default function BookingForm() {
                             className="mt-2 w-full h-28 rounded-xl border-2 border-dashed border-black/15 hover:border-vv-yellow bg-vv-cream/50 flex flex-col items-center justify-center gap-1 text-vv-black/60"
                           >
                             <Upload className="h-6 w-6 text-vv-yellow-deep" />
-                            <span className="text-sm font-medium">
-                              Toca para subir foto
-                            </span>
-                            <span className="text-[11px] text-vv-black/50">
-                              JPG, PNG · Máx 5MB
-                            </span>
+                            <span className="text-sm font-medium">{t("book.photo.tap")}</span>
+                            <span className="text-[11px] text-vv-black/50">{t("book.photo.hint")}</span>
                           </button>
                         ) : (
                           <div className="mt-2 relative rounded-xl overflow-hidden border border-black/10">
                             <img
                               src={URL.createObjectURL(data.photo)}
-                              alt="Foto del daño"
+                              alt="Damage"
                               className="w-full h-40 object-cover"
                             />
                             <button
                               type="button"
                               onClick={() => set("photo", null)}
                               className="absolute top-2 right-2 bg-vv-black/80 text-white rounded-full p-1.5 hover:bg-vv-black"
-                              aria-label="Quitar foto"
+                              aria-label="Remove"
                             >
                               <X className="h-4 w-4" />
                             </button>
@@ -478,24 +441,20 @@ export default function BookingForm() {
                   {/* STEP 3 */}
                   {step === 3 && (
                     <div className="space-y-5">
-                      <StepHeader
-                        icon={Settings2}
-                        title="¿Cuándo y dónde?"
-                        subtitle="Elige la urgencia y el lugar del servicio."
-                      />
+                      <StepHeader icon={Settings2} title={t("book.step3.t")} subtitle={t("book.step3.s")} />
                       <div>
-                        <Label>¿Cuándo lo necesitas? *</Label>
+                        <Label>{t("book.when")} *</Label>
                         <div className="grid grid-cols-3 gap-2 mt-2">
                           {[
-                            { v: "Hoy", label: "🔥 Hoy" },
-                            { v: "Mañana", label: "Mañana" },
-                            { v: "Esta semana", label: "Esta semana" },
+                            { v: "Hoy", label: t("book.when1") },
+                            { v: "Mañana", label: t("book.when2") },
+                            { v: "Esta semana", label: t("book.when3") },
                           ].map((o) => (
                             <button
                               key={o.v}
                               type="button"
                               onClick={() => set("when", o.v)}
-                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+                              className={`h-12 rounded-xl border-2 text-xs md:text-sm font-semibold transition-all px-1 ${
                                 data.when === o.v
                                   ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
@@ -509,31 +468,27 @@ export default function BookingForm() {
                       </div>
 
                       <div>
-                        <Label>¿Dónde? *</Label>
+                        <Label>{t("book.where")} *</Label>
                         <RadioGroup
                           value={data.where}
                           onValueChange={(v) => set("where", v)}
                           className="grid grid-cols-3 gap-2 mt-2"
                         >
                           {[
-                            { v: "Taller", label: "Taller" },
-                            { v: "Casa", label: "Mi casa" },
-                            { v: "Trabajo", label: "Mi trabajo" },
+                            { v: "Taller", label: t("book.where1") },
+                            { v: "Casa", label: t("book.where2") },
+                            { v: "Trabajo", label: t("book.where3") },
                           ].map((o) => (
                             <label
                               key={o.v}
                               htmlFor={`where-${o.v}`}
-                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                              className={`h-12 rounded-xl border-2 text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer px-1 ${
                                 data.where === o.v
                                   ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
                               }`}
                             >
-                              <RadioGroupItem
-                                id={`where-${o.v}`}
-                                value={o.v}
-                                className="sr-only"
-                              />
+                              <RadioGroupItem id={`where-${o.v}`} value={o.v} className="sr-only" />
                               {o.label}
                             </label>
                           ))}
@@ -543,19 +498,17 @@ export default function BookingForm() {
 
                       {(data.where === "Casa" || data.where === "Trabajo") && (
                         <div>
-                          <Label htmlFor="address">
-                            Dirección (servicio móvil) *
-                          </Label>
+                          <Label htmlFor="address">{t("book.address")} *</Label>
                           <Input
                             id="address"
-                            placeholder="Ej. 1234 Main St, San Diego, CA 92101"
+                            placeholder={t("book.address.ph")}
                             value={data.address}
                             onChange={(e) => set("address", e.target.value)}
                             className="mt-1.5 h-12"
                           />
                           <p className="mt-1 text-[11px] text-vv-black/60 flex items-center gap-1">
                             <Sparkles className="h-3 w-3 text-vv-yellow-deep" />
-                            Sin costo extra en la mayoría de zonas de San Diego.
+                            {t("book.addressHint")}
                           </p>
                           <FieldErr msg={errors.address} />
                         </div>
@@ -566,20 +519,16 @@ export default function BookingForm() {
                   {/* STEP 4 */}
                   {step === 4 && (
                     <div className="space-y-5">
-                      <StepHeader
-                        icon={CalendarClock}
-                        title="Elige fecha y hora"
-                        subtitle="Solo mostramos días con disponibilidad real."
-                      />
+                      <StepHeader icon={CalendarClock} title={t("book.step4.t")} subtitle={t("book.step4.s")} />
 
                       <div className="flex items-center gap-2 bg-vv-yellow/15 border border-vv-yellow/40 rounded-lg px-3 py-2 mb-2">
                         <span className="text-xs font-semibold text-vv-black">
-                          🔥 Solo 3 citas disponibles hoy. Reserva la tuya.
+                          {t("book.scarcity")}
                         </span>
                       </div>
 
                       <div>
-                        <Label>Fecha *</Label>
+                        <Label>{t("book.date")} *</Label>
                         <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mt-2">
                           {dates.map((d) => (
                             <button
@@ -592,15 +541,9 @@ export default function BookingForm() {
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
                               }`}
                             >
-                              <span className="text-[10px] uppercase font-medium">
-                                {d.weekday.replace(".", "")}
-                              </span>
-                              <span className="text-lg font-extrabold leading-none">
-                                {d.day}
-                              </span>
-                              <span className="text-[10px] uppercase">
-                                {d.month.replace(".", "")}
-                              </span>
+                              <span className="text-[10px] uppercase font-medium">{d.weekday.replace(".", "")}</span>
+                              <span className="text-lg font-extrabold leading-none">{d.day}</span>
+                              <span className="text-[10px] uppercase">{d.month.replace(".", "")}</span>
                             </button>
                           ))}
                         </div>
@@ -608,17 +551,17 @@ export default function BookingForm() {
                       </div>
 
                       <div>
-                        <Label>Franja horaria *</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
+                        <Label>{t("book.slot")} *</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                           {[
-                            { v: "Mañana (8am–12pm)", label: "🌅 Mañana (8am–12pm)" },
-                            { v: "Tarde (12pm–6pm)", label: "☀️ Tarde (12pm–6pm)" },
+                            { v: "Mañana (8am–12pm)", label: t("book.slot1") },
+                            { v: "Tarde (12pm–6pm)", label: t("book.slot2") },
                           ].map((o) => (
                             <button
                               key={o.v}
                               type="button"
                               onClick={() => set("serviceTime", o.v)}
-                              className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+                              className={`h-12 rounded-xl border-2 text-xs md:text-sm font-semibold transition-all px-2 ${
                                 data.serviceTime === o.v
                                   ? "border-vv-yellow bg-vv-yellow/15 text-vv-black"
                                   : "border-black/10 bg-white text-vv-black/70 hover:border-vv-yellow/50"
@@ -633,7 +576,7 @@ export default function BookingForm() {
 
                       <p className="text-[11px] text-vv-black/55 flex items-center gap-1">
                         <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
-                        Te confirmamos por WhatsApp en 15 min.
+                        {t("book.confirmWhatsapp")}
                       </p>
                     </div>
                   )}
@@ -641,16 +584,12 @@ export default function BookingForm() {
                   {/* STEP 5 */}
                   {step === 5 && (
                     <div className="space-y-5">
-                      <StepHeader
-                        icon={User}
-                        title="¿Cómo te contactamos?"
-                        subtitle="Último paso. Te llamaremos o escribiremos en 15 minutos."
-                      />
+                      <StepHeader icon={User} title={t("book.step5.t")} subtitle={t("book.step5.s")} />
                       <div>
-                        <Label htmlFor="name">Nombre completo *</Label>
+                        <Label htmlFor="name">{t("book.name")} *</Label>
                         <Input
                           id="name"
-                          placeholder="Ej. Juan Pérez"
+                          placeholder={t("book.name.ph")}
                           value={data.name}
                           onChange={(e) => set("name", e.target.value)}
                           className="mt-1.5 h-12"
@@ -658,37 +597,37 @@ export default function BookingForm() {
                         <FieldErr msg={errors.name} />
                       </div>
                       <div>
-                        <Label htmlFor="phone">Teléfono *</Label>
+                        <Label htmlFor="phone">{t("book.phone")} *</Label>
                         <Input
                           id="phone"
                           type="tel"
                           inputMode="tel"
-                          placeholder="(619) 555-0199"
+                          placeholder="(619) 646-2759"
                           value={data.phone}
                           onChange={(e) => set("phone", formatPhone(e.target.value))}
                           className="mt-1.5 h-12"
                         />
                         <p className="mt-1 text-[11px] text-vv-black/55">
-                          📲 Te llamaremos o escribiremos por WhatsApp.
+                          {t("book.phoneHint")}
                         </p>
                         <FieldErr msg={errors.phone} />
                       </div>
                       <div>
-                        <Label htmlFor="email">Email (opcional)</Label>
+                        <Label htmlFor="email">{t("book.email")}</Label>
                         <Input
                           id="email"
                           type="email"
-                          placeholder="tucorreo@ejemplo.com"
+                          placeholder="you@example.com"
                           value={data.email}
                           onChange={(e) => set("email", e.target.value)}
                           className="mt-1.5 h-12"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="notes">Notas (opcional)</Label>
+                        <Label htmlFor="notes">{t("book.notes")}</Label>
                         <Textarea
                           id="notes"
-                          placeholder="Cuéntanos detalles del daño, color del auto, sensor de lluvia, etc."
+                          placeholder={t("book.notes.ph")}
                           value={data.notes}
                           onChange={(e) => set("notes", e.target.value)}
                           className="mt-1.5 min-h-[80px]"
@@ -697,8 +636,7 @@ export default function BookingForm() {
 
                       <div className="flex items-center gap-2 text-[11px] text-vv-black/55 bg-vv-cream rounded-lg px-3 py-2">
                         <ShieldCheck className="h-4 w-4 text-vv-green shrink-0" />
-                        🔒 Tu información está segura. No la compartimos con
-                        terceros.
+                        {t("book.secure")}
                       </div>
                     </div>
                   )}
@@ -717,15 +655,15 @@ export default function BookingForm() {
                   className="text-vv-black/70 hover:text-vv-black hover:bg-black/5 h-12"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
-                  Atrás
+                  {t("book.back")}
                 </Button>
                 {step < 5 ? (
                   <Button
                     type="button"
                     onClick={next}
-                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-6"
+                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-5 md:px-6"
                   >
-                    Continuar
+                    {t("book.next")}
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 ) : (
@@ -733,17 +671,17 @@ export default function BookingForm() {
                     type="button"
                     onClick={submit}
                     disabled={submitting}
-                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-6 pulse-yellow-glow"
+                    className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12 px-5 md:px-6 pulse-yellow-glow"
                   >
                     {submitting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Enviando…
+                        {t("book.sending")}
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Agendar Cita Gratis
+                        {t("book.submit")}
                       </>
                     )}
                   </Button>
@@ -756,7 +694,7 @@ export default function BookingForm() {
         {!done && (
           <p className="mt-4 text-center text-xs text-vv-black/50 flex items-center justify-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-vv-green" />
-            Información segura · Sin compromiso · Cancela cuando quieras
+            {t("book.footer")}
           </p>
         )}
       </div>
@@ -803,15 +741,16 @@ function Confirmation({
   data: FormData;
   whatsappUrl: string;
 }) {
+  const { t } = useI18n();
   const summary = [
-    { label: "Vehículo", value: `${data.year} ${data.brand} ${data.model}` },
-    { label: "Vidrio", value: data.glassType },
-    { label: "Seguro", value: data.hasInsurance ? "Sí" : "No" },
-    { label: "Fecha", value: data.serviceDate },
-    { label: "Horario", value: data.serviceTime },
-    { label: "Lugar", value: data.where + (data.address ? ` — ${data.address}` : "") },
-    { label: "Nombre", value: data.name },
-    { label: "Teléfono", value: data.phone },
+    { label: t("book.confirm.vehicle"), value: `${data.year} ${data.brand} ${data.model}` },
+    { label: t("book.confirm.glass"), value: data.glassType },
+    { label: t("book.confirm.insurance"), value: data.hasInsurance ? t("book.confirm.yes") : t("book.confirm.no") },
+    { label: t("book.confirm.date"), value: data.serviceDate },
+    { label: t("book.confirm.slot"), value: data.serviceTime },
+    { label: t("book.confirm.place"), value: data.where + (data.address ? ` — ${data.address}` : "") },
+    { label: t("book.confirm.name"), value: data.name },
+    { label: t("book.confirm.phone"), value: data.phone },
   ];
 
   return (
@@ -825,17 +764,16 @@ function Confirmation({
         <PartyPopper className="h-10 w-10" />
       </div>
       <h3 className="text-vv-black font-extrabold text-2xl md:text-3xl">
-        ¡Cita Agendada! 🎉
+        {t("book.confirm.title")}
       </h3>
       <p className="mt-2 text-vv-black/70 text-sm md:text-base">
-        Gracias <span className="font-bold">{data.name.split(" ")[0]}</span>. Hemos
-        recibido tu solicitud. <strong>Te contactaremos en 15 min</strong> para
-        confirmar.
+        {t("book.confirm.body")} <span className="font-bold">{data.name.split(" ")[0]}</span>.
+        {t("book.confirm.body2")}
       </p>
 
       <div className="mt-6 text-left bg-vv-cream rounded-2xl p-5 border border-black/5">
         <div className="text-[11px] uppercase tracking-wider text-vv-black/50 font-bold mb-3">
-          Resumen de tu cita
+          {t("book.confirm.summary")}
         </div>
         <dl className="grid sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
           {summary.map((s) => (
@@ -853,19 +791,19 @@ function Confirmation({
             <svg viewBox="0 0 32 32" className="h-5 w-5 mr-2 fill-current">
               <path d="M16.04 4c-6.6 0-12 5.36-12 11.97 0 2.11.55 4.16 1.6 5.97L4 28l6.22-1.62a11.95 11.95 0 0 0 5.82 1.49h.01c6.6 0 12-5.36 12-11.97C28.05 9.36 22.65 4 16.04 4zm5.41 13.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35z" />
             </svg>
-            Enviar confirmación por WhatsApp
+            {t("book.confirm.whatsapp")}
           </a>
         </Button>
         <Button asChild variant="outline" className="border-vv-black/30 text-vv-black hover:bg-vv-black hover:text-white bg-transparent h-12 px-6">
           <a href={`tel:${BUSINESS.phoneTel}`}>
-            Llamar ahora: {BUSINESS.phoneDisplay}
+            {t("book.confirm.call")} {BUSINESS.phoneDisplay}
           </a>
         </Button>
       </div>
 
       <p className="mt-4 text-xs text-vv-black/55 flex items-center justify-center gap-1.5">
         <Clock className="h-3.5 w-3.5 text-vv-yellow-deep" />
-        Te contactaremos en 15 min · Revisa tu WhatsApp
+        {t("book.confirm.footer")}
       </p>
     </motion.div>
   );

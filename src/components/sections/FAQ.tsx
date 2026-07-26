@@ -9,52 +9,25 @@ import {
 import { motion } from "framer-motion";
 import { Phone, HelpCircle } from "lucide-react";
 import { BUSINESS } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
-const faqs = [
-  {
-    q: "¿Cuánto cuesta reemplazar un parabrisas?",
-    a: "El precio varía según marca, modelo y año del vehículo, y si eliges vidrio nuevo OEM, aftermarket o usado. En general, el rango va de $200 a $800. Te damos una cotización exacta en menos de 15 minutos sin compromiso. Vehículos con sensores ADAS (cámara, sensor de lluvia) pueden tener un costo adicional por recalibración.",
-  },
-  {
-    q: "¿Aceptan seguros?",
-    a: "Sí, trabajamos con todas las aseguranzas principales: State Farm, Geico, Progressive, Allstate, Farmers, USAA y más. Manejamos todo el reclamo por ti: tú solo pagas tu deducible (o nada, si tu póliza cubre vidrio sin deducible). Coordinamos directamente con la aseguradora para ahorrarte el papeleo.",
-  },
-  {
-    q: "¿Cuánto tarda la instalación?",
-    a: "La instalación toma entre 45 y 90 minutos según el vehículo. Después necesitas esperar 1 hora para que el adhesivo cure antes de poder manejar (drive-away time). En total, estás de vuelta en la carretera en menos de 2.5 horas. Te avisamos claramente cuándo es seguro mover el auto.",
-  },
-  {
-    q: "¿Tienen vidrios usados?",
-    a: "Sí, ofrecemos tanto vidrios nuevos (OEM y aftermarket) como usados en buen estado. Los vidrios usados son una excelente opción para presupuestos ajustados: te pueden ahorrar entre $100 y $300. Todos pasan por inspección de calidad antes de la instalación y tienen la misma garantía de mano de obra de por vida.",
-  },
-  {
-    q: "¿Van a mi casa o trabajo?",
-    a: "Sí, nuestro servicio móvil cubre todo San Diego County: San Diego, Chula Vista, La Mesa, El Cajon, National City, Imperial Beach, Coronado, Santee, Spring Valley, Lemon Grove, Encinitas, Carlsbad, Escondido y Oceanside. Sin costo extra en la mayoría de las zonas. Tú sigues con tu día mientras trabajamos.",
-  },
-  {
-    q: "¿Qué garantía ofrecen?",
-    a: "Garantía de por vida en la mano de obra: si el vidrio presenta fugas, ruidos o problemas de instalación, lo corregimos sin costo. Garantía del fabricante en el vidrio mismo (1 año típico). Sin letra pequeña, sin excusas, sin cobros escondidos. La garantía está por escrito en tu factura.",
-  },
-  {
-    q: "¿Puedo manejar inmediatamente después?",
-    a: "No. Necesitas esperar 1 hora después de la instalación para que el adhesivo uretano cure correctamente. Mover el auto antes puede comprometer el sellado y la seguridad. Te avisamos por escrito la hora exacta en la que es seguro manejar. Si es urgente, podemos usar adhesivo de curado rápido (cargo adicional).",
-  },
-  {
-    q: "¿Atienden el mismo día?",
-    a: "Sí. Si llamas antes de las 2pm, en la mayoría de los casos agendamos para el mismo día, especialmente si tienes el vidrio disponible en almacén. Llama al (619) 555-0199 lo antes posible para asegurar tu lugar. El servicio móvil también está disponible mismo día según cobertura.",
-  },
-  {
-    q: "¿Qué formas de pago aceptan?",
-    a: "Efectivo, todas las tarjetas (Visa, Mastercard, Amex, Discover), pago directo desde tu seguro, y ofrecemos opciones de financiamiento para reparaciones mayores. Aceptamos Zelle y Venmo también. Factura detallada disponible para tu seguro o contabilidad.",
-  },
-  {
-    q: "¿Son licenciados y asegurados?",
-    a: "Sí, estamos completamente licenciados en el estado de California (Lic. #CA-AG-12345) y asegurados. Nuestros técnicos están certificados y capacitados en las últimas tecnologías de vidrios automotrices, incluyendo ADAS, sensores de lluvia y cámaras. Miembro del Better Business Bureau con calificación A+.",
-  },
-];
-
 export default function FAQ() {
+  const { t } = useI18n();
+
+  const faqs = [
+    { q: t("faq.q1"), a: t("faq.a1") },
+    { q: t("faq.q2"), a: t("faq.a2") },
+    { q: t("faq.q3"), a: t("faq.a3") },
+    { q: t("faq.q4"), a: t("faq.a4") },
+    { q: t("faq.q5"), a: t("faq.a5") },
+    { q: t("faq.q6"), a: t("faq.a6") },
+    { q: t("faq.q7"), a: t("faq.a7") },
+    { q: t("faq.q8"), a: t("faq.a8") },
+    { q: t("faq.q9"), a: t("faq.a9") },
+    { q: t("faq.q10"), a: t("faq.a10") },
+  ];
+
   return (
     <section
       id="faq"
@@ -63,17 +36,13 @@ export default function FAQ() {
     >
       <div className="mx-auto max-w-4xl px-4 md:px-6">
         <div className="text-center mb-10 md:mb-14">
-          <p className="kicker text-vv-yellow-deep mb-3">Preguntas Frecuentes</p>
+          <p className="kicker text-vv-yellow-deep mb-3">{t("faq.kicker")}</p>
           <h2
             id="faq-heading"
             className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            Resolvemos tus <span className="text-gradient-yellow">dudas</span>
+            {t("faq.title")}
           </h2>
-          <p className="mt-4 text-vv-black/70 text-base md:text-lg">
-            Si tienes otra pregunta, escríbenos por WhatsApp y te respondemos al
-            instante.
-          </p>
         </div>
 
         <motion.div
@@ -108,9 +77,6 @@ export default function FAQ() {
         </motion.div>
 
         <div className="mt-10 text-center">
-          <p className="text-vv-black/70 text-sm mb-4">
-            ¿Aún tienes preguntas? Estamos para ayudarte.
-          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-14 px-7">
               <a href={`tel:${BUSINESS.phoneTel}`}>
@@ -119,7 +85,7 @@ export default function FAQ() {
               </a>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-vv-black/30 text-vv-black hover:bg-vv-black hover:text-white bg-transparent font-semibold h-14 px-7">
-              <a href="#agendar">Agendar cita gratis →</a>
+              <a href="#agendar">{t("cta.primary")}</a>
             </Button>
           </div>
         </div>

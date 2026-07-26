@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import { BUSINESS } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 
 export default function Brands() {
+  const { t } = useI18n();
   return (
     <section
       aria-labelledby="brands-heading"
@@ -11,17 +13,15 @@ export default function Brands() {
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10">
-          <p className="kicker text-vv-yellow-deep mb-3">Marcas que atendemos</p>
+          <p className="kicker text-vv-yellow-deep mb-3">{t("brands.kicker")}</p>
           <h2
             id="brands-heading"
             className="text-vv-black font-extrabold text-3xl md:text-5xl tracking-tight"
           >
-            Trabajamos con <span className="text-gradient-yellow">TODAS</span> las
-            marcas
+            {t("brands.title")}
           </h2>
           <p className="mt-4 text-vv-black/70 text-base md:text-lg">
-            Si tiene vidrio, lo reemplazamos. Desde autos económicos hasta
-            vehículos de lujo.
+            {t("brands.sub")}
           </p>
         </div>
 
@@ -43,12 +43,11 @@ export default function Brands() {
         </div>
 
         <p className="mt-8 text-center text-vv-black/60 text-sm">
-          ¿No ves tu marca?{" "}
           <a
             href="#agendar"
             className="text-vv-black font-bold underline decoration-vv-yellow decoration-2 underline-offset-4 hover:text-vv-yellow-deep"
           >
-            Pregúntanos, seguro la tenemos.
+            {t("brands.cta")}
           </a>
         </p>
       </div>

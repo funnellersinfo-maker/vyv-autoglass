@@ -4,17 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Menu, Phone, X } from "lucide-react";
 import { BUSINESS } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
-const NAV = [
-  { label: "Servicios", href: "#servicios" },
-  { label: "Cómo Funciona", href: "#como-funciona" },
-  { label: "Testimonios", href: "#testimonios" },
-  { label: "Antes y Después", href: "#antes-despues" },
-  { label: "FAQ", href: "#faq" },
-];
-
 export default function Header() {
+  const { t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -24,6 +18,27 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const NAV = [
+    { label: t("nav.services"), href: "#servicios" },
+    { label: t("nav.how"), href: "#como-funciona" },
+    { label: t("nav.testimonials"), href: "#testimonios" },
+    { label: t("nav.beforeAfter"), href: "#antes-despues" },
+    { label: t("nav.about"), href: "#experto" },
+    { label: t("nav.faq"), href: "#faq" },
+  ];
 
   return (
     <header
@@ -83,7 +98,7 @@ export default function Header() {
             </a>
           </Button>
           <Button asChild size="sm" className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold">
-            <a href="#agendar">Agendar Cita</a>
+            <a href="#agendar">{t("header.book")}</a>
           </Button>
         </div>
 
@@ -91,19 +106,30 @@ export default function Header() {
         <button
           aria-label="Abrir menú"
           onClick={() => setOpen(true)}
-          className="lg:hidden text-white p-2 rounded-md hover:bg-white/10"
+          className="lg:hidden text-white p-2 rounded-md hover:bg-white/10 shrink-0"
         >
           <Menu className="h-6 w-6" />
         </button>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — SOLID dark background, fully readable */}
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-vv-black/95 backdrop-blur-lg flex flex-col">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-            <span className="text-white font-bold text-lg">
-              V&amp;V <span className="text-vv-yellow">Auto Glass</span>
-            </span>
+        <div className="lg:hidden fixed inset-0 z-50 bg-vv-black flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-vv-black">
+            <div className="flex items-center gap-3">
+              <div className="relative h-10 w-10 rounded-lg overflow-hidden ring-1 ring-vv-yellow/40 bg-white">
+                <Image
+                  src="/logos/vv-auto-glass.png"
+                  alt="V&V Auto Glass logo"
+                  fill
+                  className="object-contain p-1"
+                  sizes="40px"
+                />
+              </div>
+              <span className="text-white font-bold text-lg">
+                V&amp;V <span className="text-vv-yellow">Auto Glass</span>
+              </span>
+            </div>
             <button
               aria-label="Cerrar menú"
               onClick={() => setOpen(false)}
@@ -112,22 +138,22 @@ export default function Header() {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex flex-col px-5 py-6 gap-1">
+          <nav className="flex flex-col px-5 py-4 gap-1 overflow-y-auto flex-1">
             {NAV.map((n) => (
               <a
                 key={n.href}
                 href={n.href}
                 onClick={() => setOpen(false)}
-                className="text-white text-lg font-medium py-3 border-b border-white/5"
+                className="text-white text-lg font-medium py-3.5 border-b border-white/5"
               >
                 {n.label}
               </a>
             ))}
           </nav>
-          <div className="mt-auto p-5 flex flex-col gap-3">
+          <div className="p-5 flex flex-col gap-3 bg-vv-black border-t border-white/10">
             <Button asChild size="lg" className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-12">
               <a href="#agendar" onClick={() => setOpen(false)}>
-                Agendar Cita Gratis
+                {t("hero.cta.primary")}
               </a>
             </Button>
             <Button asChild variant="outline" size="lg" className="border-white/40 text-white hover:bg-white hover:text-vv-black bg-transparent h-12">

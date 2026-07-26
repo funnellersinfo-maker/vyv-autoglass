@@ -4,21 +4,25 @@ import { motion } from "framer-motion";
 import { Phone, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUSINESS } from "@/lib/business";
+import { useI18n } from "@/lib/i18n";
 
 type Props = {
-  title?: string;
-  subtitle?: string;
+  title: string;
+  subtitle: string;
   variant?: "yellow" | "dark";
   ctaPrimary?: string;
 };
 
 export default function CTABanner({
-  title = "¿Listo para tu cotización gratis?",
-  subtitle = "Tu parabrisas no va a esperar. Cada minuto cuenta.",
+  title,
+  subtitle,
   variant = "yellow",
-  ctaPrimary = "Agendar Cita Gratis →",
+  ctaPrimary,
 }: Props) {
+  const { t } = useI18n();
   const isYellow = variant === "yellow";
+  const ctaLabel = ctaPrimary ?? t("cta.primary");
+
   return (
     <section className="py-10 md:py-14">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
@@ -27,7 +31,7 @@ export default function CTABanner({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5 }}
-          className={`relative overflow-hidden rounded-3xl px-6 py-10 md:px-12 md:py-12 ${
+          className={`relative overflow-hidden rounded-3xl px-5 py-8 md:px-12 md:py-12 ${
             isYellow ? "bg-vv-yellow" : "bg-vv-black-soft ring-1 ring-vv-yellow/30"
           }`}
         >
@@ -40,10 +44,10 @@ export default function CTABanner({
             }}
             aria-hidden="true"
           />
-          <div className="relative grid md:grid-cols-12 gap-6 items-center">
+          <div className="relative grid md:grid-cols-12 gap-5 md:gap-6 items-center">
             <div className="md:col-span-8 text-center md:text-left">
               <h3
-                className={`font-extrabold text-2xl md:text-4xl tracking-tight ${
+                className={`font-extrabold text-2xl md:text-4xl tracking-tight leading-tight ${
                   isYellow ? "text-vv-black" : "text-white"
                 }`}
               >
@@ -61,37 +65,37 @@ export default function CTABanner({
                   isYellow ? "text-vv-black/60" : "text-white/55"
                 }`}
               >
-                ⏱️ Mismo día · 📲 Respuesta en 15 min · 🔒 Sin compromiso
+                {t("cta.micro")}
               </p>
             </div>
             <div className="md:col-span-4 flex flex-col gap-3">
               <Button
                 asChild
                 size="lg"
-                className={`font-bold h-14 px-6 ${
+                className={`font-bold h-14 px-5 md:px-6 w-full ${
                   isYellow
                     ? "bg-vv-black text-white hover:bg-vv-black/85"
                     : "bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep pulse-yellow-glow"
                 }`}
               >
                 <a href="#agendar">
-                  <CalendarCheck className="mr-2 h-5 w-5" />
-                  {ctaPrimary}
+                  <CalendarCheck className="mr-2 h-5 w-5 shrink-0" />
+                  <span className="leading-tight text-left">{ctaLabel}</span>
                 </a>
               </Button>
               <Button
                 asChild
                 size="lg"
                 variant="outline"
-                className={`h-14 px-6 ${
+                className={`h-14 px-5 md:px-6 w-full ${
                   isYellow
                     ? "border-vv-black/40 text-vv-black hover:bg-vv-black hover:text-white bg-transparent"
                     : "border-white/40 text-white hover:bg-white hover:text-vv-black bg-transparent"
                 }`}
               >
                 <a href={`tel:${BUSINESS.phoneTel}`}>
-                  <Phone className="mr-2 h-5 w-5" />
-                  Llamar ahora
+                  <Phone className="mr-2 h-5 w-5 shrink-0" />
+                  {t("cta.secondary")}
                 </a>
               </Button>
             </div>
