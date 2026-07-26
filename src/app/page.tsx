@@ -18,7 +18,6 @@ import CTABanner from "@/components/sections/CTABanner";
 import FAQ from "@/components/sections/FAQ";
 import Footer from "@/components/sections/Footer";
 import { I18nProvider, useI18n } from "@/lib/i18n";
-import LanguageSwitch from "@/components/LanguageSwitch";
 
 export default function Home() {
   return (
@@ -33,7 +32,6 @@ function PageContent() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <LanguageSwitch />
       <main className="flex-1">
         <Hero />
         <Benefits />

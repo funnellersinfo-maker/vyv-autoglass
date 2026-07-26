@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,6 +99,19 @@ export default function BookingForm() {
   });
 
   const dates = useMemo(() => nextDates(8, lang), [lang]);
+
+  // Listen for date selection from HeroCalendar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<string>;
+      if (ce.detail) {
+        setData((p) => ({ ...p, serviceDate: ce.detail }));
+        setStep(4); // jump to schedule step
+      }
+    };
+    window.addEventListener("vv:select-date", handler);
+    return () => window.removeEventListener("vv:select-date", handler);
+  }, []);
   const steps = [
     { id: 1, label: lang === "en" ? "Vehicle" : "Vehículo", icon: Car },
     { id: 2, label: lang === "en" ? "Damage" : "Daño", icon: Camera },

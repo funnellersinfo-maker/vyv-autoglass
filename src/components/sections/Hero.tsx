@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { BUSINESS } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
 import DopamineBackground from "@/components/DopamineBackground";
+import LanguageSwitch from "@/components/LanguageSwitch";
+import HeroCalendar from "@/components/HeroCalendar";
+import LiveSlotsCounter from "@/components/LiveSlotsCounter";
 
 export default function Hero() {
   const { t } = useI18n();
@@ -36,6 +39,9 @@ export default function Hero() {
     >
       <DopamineBackground />
 
+      {/* Language switch — absolute positioned inside hero, sits in the gap between top bar and badge */}
+      <LanguageSwitch />
+
       {/* Top ultra-thin bar */}
       <div className="relative z-10 border-b border-white/10 bg-black/30 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 md:px-6 py-1.5 flex items-center justify-center gap-2 md:gap-3 text-[11px] md:text-xs text-white/80 text-center">
@@ -54,7 +60,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 pt-10 md:pt-16 pb-14 md:pb-20 grid lg:grid-cols-12 gap-10 items-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 pt-12 md:pt-16 pb-14 md:pb-20 grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left content */}
         <div className="lg:col-span-7">
           <motion.div
@@ -86,6 +92,16 @@ export default function Hero() {
           >
             {t("hero.sub")}
           </motion.p>
+
+          {/* Live scarcity counter */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-4"
+          >
+            <LiveSlotsCounter initialSlots={3} variant="dark" />
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -135,71 +151,21 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Right image */}
+        {/* Right column — dynamic gamified calendar */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
           className="lg:col-span-5 relative"
         >
-          <div className="relative aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-white/15 shadow-2xl">
-            <Image
-              src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=80&auto=format&fit=crop"
-              alt={t("alt.hero")}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-vv-black/80 via-transparent to-transparent" />
+          <HeroCalendar />
 
-            {/* Floating badge */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-4 left-4 glass-card rounded-xl px-3 py-2 flex items-center gap-2"
-            >
-              <Clock className="h-4 w-4 text-vv-yellow" />
-              <div className="text-white text-xs">
-                <div className="font-bold">{t("hero.response")}</div>
-                <div className="text-vv-yellow font-extrabold">{t("hero.1min")}</div>
-              </div>
-              <span className="ml-1 relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-vv-green opacity-70 pulse-green-dot" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-vv-green" />
-              </span>
-            </motion.div>
-
-            {/* Bottom rating badge */}
-            <div className="absolute bottom-4 left-4 right-4 glass-card rounded-xl px-4 py-3 flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {["MG", "DC", "RM", "JR"].map((i) => (
-                  <div
-                    key={i}
-                    className="h-7 w-7 rounded-full bg-vv-yellow text-vv-black grid place-items-center text-[10px] font-bold ring-2 ring-vv-black"
-                  >
-                    {i}
-                  </div>
-                ))}
-              </div>
-              <div className="text-white text-xs leading-tight">
-                <div className="flex items-center gap-0.5 text-vv-yellow">
-                  {"★★★★★"}
-                  <span className="text-white font-bold ml-1">{BUSINESS.rating}</span>
-                </div>
-                <div className="text-white/70">
-                  {t("hero.ratedBy")}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating mini stats */}
+          {/* Floating mini stats below calendar */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="absolute -bottom-5 -left-5 hidden md:flex bg-vv-yellow text-vv-black rounded-2xl px-4 py-3 shadow-xl items-center gap-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="hidden md:flex absolute -bottom-5 -left-5 bg-vv-yellow text-vv-black rounded-2xl px-4 py-3 shadow-xl items-center gap-2"
           >
             <CheckCircle2 className="h-5 w-5" />
             <div className="text-xs leading-tight">
