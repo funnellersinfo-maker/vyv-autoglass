@@ -11,7 +11,7 @@ export default function LanguageSwitch({ className = "" }: { className?: string 
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.4 }}
-      className={`absolute right-3 top-2 z-30 select-none ${className}`}
+      className={`absolute right-3 top-9 z-30 select-none ${className}`}
       aria-label="Language selector"
     >
       <div className="flex items-center bg-vv-black/90 backdrop-blur-md border border-vv-yellow/40 rounded-full p-1 shadow-lg">
