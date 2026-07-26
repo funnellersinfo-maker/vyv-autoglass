@@ -176,30 +176,34 @@ export default function BookingForm() {
     if (!validateStep(5)) return;
     setSubmitting(true);
     try {
-      const fd = new FormData();
-      fd.append("name", data.name);
-      fd.append("phone", data.phone);
-      fd.append("email", data.email);
-      fd.append("brand", data.brand);
-      fd.append("model", data.model);
-      fd.append("year", data.year);
-      fd.append("glassType", data.glassType);
-      fd.append("hasInsurance", String(data.hasInsurance));
-      if (data.photo) fd.append("photo", data.photo);
-      fd.append("serviceDate", data.serviceDate);
-      fd.append("serviceTime", data.serviceTime);
-      fd.append("location", data.where);
-      fd.append("address", data.address);
-      fd.append("notes", data.notes);
+      // Build a WhatsApp message with all the booking details
+      const lines = [
+        `🚗 *Nueva Cita — V&V Auto Glass*`,
+        ``,
+        `*Vehículo:* ${data.year} ${data.brand} ${data.model}`,
+        `*Vidrio:* ${data.glassType}`,
+        `*Seguro:* ${data.hasInsurance ? "Sí" : "No"}`,
+        `*Cuando:* ${data.when}`,
+        `*Lugar:* ${data.where}${data.address ? ` — ${data.address}` : ""}`,
+        `*Fecha:* ${data.serviceDate}`,
+        `*Horario:* ${data.serviceTime}`,
+        ``,
+        `*Nombre:* ${data.name}`,
+        `*Teléfono:* ${data.phone}`,
+        data.email ? `*Email:* ${data.email}` : "",
+        data.notes ? `*Notas:* ${data.notes}` : "",
+        ``,
+        `Foto del daño: ${data.photo ? "Sí, adjuntaré en el chat" : "No adjuntada"}`,
+      ].filter(Boolean);
+      const message = lines.join("\n");
+      const whatsappUrl = `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-      const res = await fetch("/api/appointments", { method: "POST", body: fd });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Error");
-      }
+      // Simulate brief processing for UX
+      await new Promise((r) => setTimeout(r, 600));
+
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3200);
-      setDone({ whatsappUrl: json.whatsappUrl, data });
+      setDone({ whatsappUrl, data });
       toast({
         title: t("book.toast.title"),
         description: t("book.toast.desc"),

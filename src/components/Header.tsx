@@ -42,10 +42,10 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
+      className={`sticky top-0 z-40 transition-all duration-300 bg-vv-black ${
         scrolled
-          ? "bg-vv-black/85 backdrop-blur-md border-b border-white/10"
-          : "bg-transparent"
+          ? "backdrop-blur-md border-b border-white/10"
+          : "border-b border-white/5"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4">
