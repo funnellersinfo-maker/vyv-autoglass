@@ -25,10 +25,12 @@ import {
   PartyPopper,
   Loader2,
   AlertCircle,
+  History,
 } from "lucide-react";
 import { BUSINESS } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
+import { track } from "@/lib/track";
 
 type FormData = {
   brand: string;
@@ -82,6 +84,10 @@ const brandList = [
 
 const yearList = Array.from({ length: 2025 - 1990 + 1 }, (_, i) => String(2025 - i));
 
+/** Borrador persistente del formulario (localStorage; la foto File no se guarda). */
+const DRAFT_KEY = "vv_booking_draft_v1";
+type DraftShape = Omit<FormData, "photo"> & { photo: null; step: number };
+
 export default function BookingForm() {
   const { t, lang } = useI18n();
   const { toast } = useToast();
@@ -97,6 +103,61 @@ export default function BookingForm() {
     photo: null, when: "", where: "", address: "", serviceDate: "",
     serviceTime: "", name: "", phone: "", email: "", notes: "",
   });
+
+  // ---- Borrador: recuperar + guardar automáticamente ----
+  const [draft, setDraft] = useState<DraftShape | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as DraftShape;
+      const hasContent = Boolean(
+        parsed.brand || parsed.model || parsed.glassType || parsed.name || parsed.phone
+      );
+      if (hasContent) setDraft(parsed);
+    } catch {
+      /* borrador corrupto: ignorar */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (done) {
+      localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
+    const hasContent =
+      data.brand || data.model || data.glassType || data.name || data.phone || data.serviceDate;
+    if (!hasContent) return;
+    const savable: DraftShape = { ...data, photo: null, step };
+    const t0 = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(savable));
+      } catch {
+        /* cuota llena: ignorar */
+      }
+    }, 400);
+    return () => clearTimeout(t0);
+  }, [data, step, done]);
+
+  const restoreDraft = () => {
+    if (!draft) return;
+    const { step: savedStep, ...fields } = draft;
+    setData((p) => ({ ...p, ...fields }));
+    setStep(Math.min(Math.max(savedStep || 1, 1), 5));
+    setDraft(null);
+    track("vv_booking_draft_restored");
+  };
+
+  const discardDraft = () => {
+    setDraft(null);
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* noop */
+    }
+  };
 
   const dates = useMemo(() => nextDates(8, lang), [lang]);
 
@@ -168,7 +229,10 @@ export default function BookingForm() {
 
   const next = () => {
     if (!validateStep(step)) return;
-    if (step < 5) setStep(step + 1);
+    if (step < 5) {
+      track("vv_form_step", { from: step, to: step + 1 });
+      setStep(step + 1);
+    }
   };
   const back = () => step > 1 && setStep(step - 1);
 
@@ -204,6 +268,11 @@ export default function BookingForm() {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3200);
       setDone({ whatsappUrl, data });
+      track("vv_booking_submit", {
+        vehicle: `${data.year} ${data.brand}`.trim(),
+        glass: data.glassType,
+        insurance: data.hasInsurance,
+      });
       toast({
         title: t("book.toast.title"),
         description: t("book.toast.desc"),
@@ -242,6 +311,39 @@ export default function BookingForm() {
             {t("book.sub")}
           </p>
         </div>
+
+        {/* Borrador guardado automáticamente */}
+        {draft && !done && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-vv-yellow/60 bg-vv-black px-4 py-3 shadow-lg"
+            role="status"
+          >
+            <History className="h-5 w-5 shrink-0 text-vv-yellow" aria-hidden="true" />
+            <p className="min-w-0 flex-1 text-xs md:text-sm text-white/90 font-medium">
+              {t("book.draft.title")}
+              {draft.brand && (
+                <span className="text-vv-yellow font-bold"> {draft.brand} {draft.model}</span>
+              )}
+            </p>
+            <Button
+              size="sm"
+              onClick={restoreDraft}
+              className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-9 px-3"
+            >
+              {t("book.draft.restore")}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={discardDraft}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-9 px-3"
+            >
+              {t("book.draft.discard")}
+            </Button>
+          </motion.div>
+        )}
 
         <div className="bg-white rounded-3xl shadow-xl border border-black/5 overflow-hidden">
           {/* Progress */}
