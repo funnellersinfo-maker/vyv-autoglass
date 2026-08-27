@@ -1,0 +1,24 @@
+{
+  "name": "V&V Auto Glass — San Diego",
+  "short_name": "V&V Auto Glass",
+  "description": "Reemplazo y reparación de parabrisas en San Diego, CA. Cotización gratis. Servicio mismo día. Garantía de por vida.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/logos/vv-auto-glass.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logos/vv-auto-glass.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

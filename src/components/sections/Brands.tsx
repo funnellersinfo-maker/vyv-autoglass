@@ -33,7 +33,7 @@ export default function Brands() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: (i % 8) * 0.04 }}
-              className="group grid place-items-center h-16 md:h-20 rounded-xl bg-vv-cream border border-black/5 hover:bg-vv-black hover:border-vv-yellow transition-colors"
+              className="group grid place-items-center h-16 md:h-20 rounded-xl bg-vv-cream border border-black/5 hover:bg-vv-black hover:border-vv-yellow hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
             >
               <span className="text-vv-black/70 group-hover:text-white font-bold text-sm md:text-base tracking-tight transition-colors">
                 {b}

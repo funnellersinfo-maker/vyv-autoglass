@@ -44,6 +44,11 @@ export default function CTABanner({
             }}
             aria-hidden="true"
           />
+          {/* Shine sweep periódico */}
+          <div
+            className="vv-shine-sweep absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+          />
           <div className="relative grid md:grid-cols-12 gap-5 md:gap-6 items-center">
             <div className="md:col-span-8 text-center md:text-left">
               <h3

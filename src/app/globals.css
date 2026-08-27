@@ -419,3 +419,28 @@
     animation: none !important;
   }
 }
+
+/* Shine sweep periódico para banners CTA */
+@keyframes vv-sweep {
+  0% { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  6% { opacity: 1; }
+  18% { transform: translateX(230%) skewX(-18deg); opacity: 0; }
+  100% { transform: translateX(230%) skewX(-18deg); opacity: 0; }
+}
+.vv-shine-sweep {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.28) 48%,
+    rgba(255, 255, 255, 0.10) 55%,
+    transparent 80%
+  );
+  animation: vv-sweep 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vv-shine-sweep {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}

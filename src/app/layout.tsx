@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     apple: "/logos/vv-auto-glass.png",
     shortcut: "/logos/vv-auto-glass.png",
   },
+  manifest: "/manifest.json",
   openGraph: {
     title:
       "V&V Auto Glass | Reemplazo de Parabrisas en San Diego - Cotización Gratis",
@@ -53,10 +54,10 @@ export const metadata: Metadata = {
     siteName: "V&V Auto Glass",
     images: [
       {
-        url: "/logos/vv-auto-glass.png",
-        width: 1254,
-        height: 1254,
-        alt: "V&V Auto Glass — San Diego, CA",
+        url: "/og-vv-van.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Victor, fundador de V&V Auto Glass, junto a su van de servicio en San Diego",
       },
     ],
     locale: "es_US",
@@ -68,7 +69,7 @@ export const metadata: Metadata = {
       "V&V Auto Glass | Reemplazo de Parabrisas en San Diego - Cotización Gratis",
     description:
       "Vidrios nuevos y usados. Cotización gratis. Garantía de por vida. Servicio móvil en San Diego.",
-    images: ["/logos/vv-auto-glass.png"],
+    images: ["/og-vv-van.jpg"],
   },
   robots: {
     index: true,
@@ -155,6 +156,23 @@ const jsonLd = {
     reviewCount: "312",
     bestRating: "5",
     worstRating: "1",
+  },
+  potentialAction: {
+    "@type": "ReserveAction",
+    name: "Agendar cita",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${SITE_URL}/#agendar`,
+      inLanguage: "es",
+      actionPlatform: [
+        "http://schema.org/DesktopWebPlatform",
+        "http://schema.org/MobileWebPlatform",
+      ],
+    },
+    result: {
+      "@type": "Reservation",
+      name: "Cita de servicio de vidrios automotrices",
+    },
   },
   hasOfferCatalog: {
     "@type": "OfferCatalog",

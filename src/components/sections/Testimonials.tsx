@@ -140,7 +140,7 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: (i % 3) * 0.08 }}
-              className="relative bg-white rounded-2xl p-5 md:p-6 border border-black/5 shadow-sm hover:shadow-lg transition-shadow"
+              className="group relative bg-white rounded-2xl p-5 md:p-6 border border-black/5 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-vv-yellow/60 transition-all duration-300"
             >
               {/* Google badge top-right */}
               <div className="absolute top-4 right-4 flex items-center gap-1">
