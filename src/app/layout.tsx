@@ -97,6 +97,8 @@ const jsonLd = {
   url: SITE_URL,
   telephone: "+1-619-646-2759",
   priceRange: "$$",
+  foundingDate: "2007",
+  slogan: "Buen servicio a precio razonable",
   currenciesAccepted: "USD",
   paymentAccepted: "Cash, Credit Card, Debit Card, Insurance, Financing",
   address: {

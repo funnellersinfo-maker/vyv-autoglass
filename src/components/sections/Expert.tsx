@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Award, Wrench, ShieldCheck, Quote } from "lucide-react";
+import { Award, Wrench, CalendarCheck, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUSINESS, whatsappLink } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
@@ -42,19 +42,19 @@ export default function Expert() {
             transition={{ duration: 0.55 }}
             className="lg:col-span-5 relative"
           >
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-black/10 shadow-2xl bg-vv-cream">
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden ring-1 ring-black/10 shadow-2xl bg-vv-cream">
               <Image
-                src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1000&q=80&auto=format&fit=crop"
-                alt="Victor — Fundador de V&V Auto Glass"
+                src="/team/victor-van.jpg"
+                alt="Victor, fundador de V&V Auto Glass, junto a su van de servicio en San Diego"
                 fill
                 loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-vv-black/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-vv-black/45 via-transparent to-transparent" />
 
               {/* Name badge */}
-              <div className="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg">
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg">
                 <div className="text-vv-black font-extrabold text-xl">Victor</div>
                 <div className="text-vv-yellow-deep text-xs font-semibold uppercase tracking-wider">
                   {t("expert.role")}
@@ -102,7 +102,7 @@ export default function Expert() {
             {/* Stats row */}
             <div className="mt-8 grid grid-cols-3 gap-3 md:gap-4">
               {stats.map((s, i) => {
-                const Icon = [Award, Wrench, ShieldCheck][i];
+                const Icon = [Award, Wrench, CalendarCheck][i];
                 return (
                   <div
                     key={i}
