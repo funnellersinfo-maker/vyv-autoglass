@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ZoomGuard } from "@/components/zoom-guard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,6 +15,17 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = "https://vvautoglass-sd.com";
+
+// Bloquea zoom/escala con gestos en móviles (pellizcar, doble tap, desplazamiento)
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#000000",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -243,6 +255,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
+        <ZoomGuard />
         {children}
         <Toaster />
       </body>

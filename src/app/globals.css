@@ -444,3 +444,9 @@
     opacity: 0 !important;
   }
 }
+
+/* Bloqueo de zoom por gestos en móviles (pellizcar/doble tap). Scroll normal permitido. */
+html,
+body {
+  touch-action: pan-x pan-y;
+}
