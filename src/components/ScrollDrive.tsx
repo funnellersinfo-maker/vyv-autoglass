@@ -89,6 +89,22 @@ export default function ScrollDrive() {
     (v) => Math.min(Math.max((Math.abs(v) - 0.1) / 0.9, 0), 0.85)
   );
 
+  // Modo turbo: estelas fantasma con springs MÁS LENTOS que el carro.
+  // Su opacidad hereda la MISMA señal de velocidad ya probada de las líneas
+  // de velocidad (speedOpacity), atenuada — en reposo no se ven.
+  const trail1 = useSpring(scrollYProgress, { stiffness: 85, damping: 22, mass: 0.9 });
+  const trail2 = useSpring(scrollYProgress, { stiffness: 58, damping: 20, mass: 1.1 });
+  const trailTop1 = useTransform(
+    trail1,
+    (v) => `calc(${(v * 100).toFixed(3)}% - ${CAR_BOX / 2}px)`
+  );
+  const trailTop2 = useTransform(
+    trail2,
+    (v) => `calc(${(v * 100).toFixed(3)}% - ${CAR_BOX / 2}px)`
+  );
+  const ghostOpacity1 = useTransform(speedOpacity, (o) => o * 0.4);
+  const ghostOpacity2 = useTransform(speedOpacity, (o) => o * 0.22);
+
   // Barra superior: con spring (suave) o directa si reduced-motion
   const progressForBar = reduceMotion ? scrollYProgress : smooth;
 
@@ -247,7 +263,7 @@ export default function ScrollDrive() {
           {/* Carretera */}
           <div
             aria-hidden="true"
-            className="absolute top-0 bottom-0 left-1/2 -ml-[7px] w-[14px] rounded-full bg-vv-black/30 ring-1 ring-white/20 backdrop-blur-[2px] md:w-[16px] md:-ml-[8px]"
+            className="absolute top-0 bottom-0 left-1/2 -ml-[7px] w-[14px] rounded-full bg-vv-black/15 ring-1 ring-white/10 backdrop-blur-[2px] md:w-[16px] md:-ml-[8px] md:bg-vv-black/30 md:ring-white/20"
           >
             <div className="vv-road-dashes absolute top-2 bottom-2 left-1/2 -ml-[1.5px] w-[3px] rounded-full opacity-80" />
           </div>
@@ -286,6 +302,28 @@ export default function ScrollDrive() {
               })}
             </nav>
           )}
+
+          {/* Estela fantasma lejana (solo visible en modo turbo) */}
+          <motion.div
+            aria-hidden="true"
+            className="absolute left-0 right-0 z-0"
+            style={{ top: trailTop2, opacity: ghostOpacity2 }}
+          >
+            <div className="mx-auto grid" style={{ height: CAR_BOX, width: CAR_BOX }}>
+              <CarSvg className="h-7 w-auto md:h-8 opacity-60" />
+            </div>
+          </motion.div>
+
+          {/* Estela fantasma cercana (solo visible en modo turbo) */}
+          <motion.div
+            aria-hidden="true"
+            className="absolute left-0 right-0 z-0"
+            style={{ top: trailTop1, opacity: ghostOpacity1 }}
+          >
+            <div className="mx-auto grid" style={{ height: CAR_BOX, width: CAR_BOX }}>
+              <CarSvg className="h-7 w-auto md:h-8 opacity-75" />
+            </div>
+          </motion.div>
 
           {/* Carro */}
           <motion.div

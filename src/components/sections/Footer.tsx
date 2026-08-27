@@ -9,7 +9,9 @@ export default function Footer() {
   const { t } = useI18n();
   return (
     <footer className="bg-vv-black text-white border-t border-vv-yellow/20">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-16">
+      {/* pl-12 en móvil: despeja el carril del ScrollDrive (termina en ~33px).
+          pb-28: deja libre la última línea tras la StickyCTA flotante. */}
+      <div className="mx-auto max-w-7xl pl-12 pr-4 md:px-6 pt-12 pb-28 md:pt-16 md:pb-28">
         <div className="grid md:grid-cols-12 gap-8 md:gap-10">
           {/* Brand */}
           <div className="md:col-span-4">

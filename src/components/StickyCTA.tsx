@@ -42,9 +42,10 @@ export default function StickyCTA() {
                 <div className="min-w-0">
                   <div className="text-white text-xs md:text-sm font-semibold leading-tight flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-vv-yellow shrink-0" />
-                    <span className="truncate">{t("sticky.open")}</span>
+                    <span className="truncate sm:hidden">{t("sticky.open.short")}</span>
+                    <span className="truncate hidden sm:inline">{t("sticky.open")}</span>
                   </div>
-                  <div className="text-white/60 text-[10px] md:text-[11px] truncate">
+                  <div className="text-white/60 text-[10px] md:text-[11px] truncate hidden sm:block">
                     {t("top.response")}
                   </div>
                 </div>

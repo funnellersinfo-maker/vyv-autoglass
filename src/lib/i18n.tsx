@@ -302,8 +302,24 @@ export const DICT: Dict = {
 
   // Sticky CTA
   "sticky.open": { es: "Abierto ahora", en: "Open now" },
+  "sticky.open.short": { es: "Abierto", en: "Open" },
   "sticky.call": { es: "Llama:", en: "Call:" },
   "sticky.book": { es: "Agendar Cita Gratis", en: "Book Free Appointment" },
+
+  // Same-day countdown (cutoff 2pm PT)
+  "countdown.before": { es: "para agendar servicio HOY", en: "to book SAME-DAY service" },
+  "countdown.after": { es: "Cupos de hoy cerrados · Agenda para mañana", en: "Today's slots are closed · Book for tomorrow" },
+
+  // Live social-proof toasts
+  "toast.kicker": { es: "Recién en V&V", en: "Just now at V&V" },
+  "toast.t1": { es: "Carlos M. · Chula Vista · Parabrisas", en: "Carlos M. · Chula Vista · Windshield" },
+  "toast.t2": { es: "Ana R. · La Mesa · Cristal lateral", en: "Ana R. · La Mesa · Side window" },
+  "toast.t3": { es: "Luis G. · National City · Grieta reparada", en: "Luis G. · National City · Chip repair" },
+  "toast.t4": { es: "Sofía T. · El Cajon · Vidrio trasero", en: "Sofía T. · El Cajon · Back glass" },
+  "toast.t5": { es: "Miguel A. · San Ysidro · Parabrisas", en: "Miguel A. · San Ysidro · Windshield" },
+  "toast.t6": { es: "Karla P. · San Diego · Cristal lateral", en: "Karla P. · San Diego · Side window" },
+  "toast.ago.min": { es: "hace {m} min", en: "{m} min ago" },
+  "toast.ago.hour": { es: "hace {m} h", en: "{m} h ago" },
 
   // ScrollDrive (carro ligado al scroll)
   "road.home": { es: "Inicio", en: "Top" },

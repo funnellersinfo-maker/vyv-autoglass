@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import ScrollDrive from "@/components/ScrollDrive";
 import StickyCTA from "@/components/StickyCTA";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import LiveJobsToast from "@/components/LiveJobsToast";
 import Hero from "@/components/sections/Hero";
 import Benefits from "@/components/sections/Benefits";
 import Services from "@/components/sections/Services";
@@ -68,6 +69,7 @@ function PageContent() {
       <ScrollDrive />
       <StickyCTA />
       <WhatsAppButton />
+      <LiveJobsToast />
     </div>
   );
 }

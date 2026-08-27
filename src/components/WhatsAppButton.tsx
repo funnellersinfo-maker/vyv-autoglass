@@ -13,12 +13,29 @@ export default function WhatsAppButton() {
 
   useEffect(() => {
     const t1 = setTimeout(() => setShow(true), 800);
-    const tipShow = setTimeout(() => setTip(true), 2500);
-    const tipHide = setTimeout(() => setTip(false), 8500);
+    let tipShown = false;
+    let tipTimer: ReturnType<typeof setTimeout> | null = null;
+    let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+    // El tooltip solo aparece cuando el usuario ya pasó el hero (scroll > 380px):
+    // así nunca tapa el CTA principal "Agendar Cita" en móvil.
+    const onScroll = () => {
+      if (tipShown || window.scrollY <= 380) return;
+      tipShown = true;
+      window.removeEventListener("scroll", onScroll);
+      tipTimer = setTimeout(() => {
+        setTip(true);
+        hideTimer = setTimeout(() => setTip(false), 5200);
+      }, 900);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       clearTimeout(t1);
-      clearTimeout(tipShow);
-      clearTimeout(tipHide);
+      if (tipTimer) clearTimeout(tipTimer);
+      if (hideTimer) clearTimeout(hideTimer);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
@@ -37,7 +54,7 @@ export default function WhatsAppButton() {
                 initial={{ opacity: 0, y: 10, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                className="relative mb-1 max-w-[220px] md:max-w-[240px] bg-white text-vv-black text-sm font-medium rounded-2xl rounded-br-none px-4 py-3 shadow-xl border border-black/5"
+                className="relative mb-1 max-w-[190px] md:max-w-[240px] bg-white text-vv-black text-sm font-medium rounded-2xl rounded-br-none px-4 py-3 shadow-xl border border-black/5"
               >
                 <button
                   aria-label="Cerrar"
