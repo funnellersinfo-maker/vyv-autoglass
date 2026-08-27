@@ -40,3 +40,30 @@ Stage Summary:
 - Backend CRM live: Prisma `Appointment` model + multipart POST handler with photo upload, console-logged automation pipeline (CRM/WhatsApp/Email/Negocio notificado), WhatsApp confirmation URL auto-built.
 - SEO: AutoGlassBusiness JSON-LD with geo, opening hours, aggregateRating, areaServed; full Spanish meta + English SEO keywords; V&V logo as favicon/OG/Twitter card.
 - Public preview URL (placeholder per instructions): `https://preview-<bot-id>.space-z.ai/`
+
+---
+Task ID: 4
+Agent: Z.ai Code (orquestador principal)
+Task: Hacer que el sitio tenga un elemento dopaminergico que se mueva con el scroll (movil ajustado, optimo, memorable); deploy completo a Cloudflare + GitHub.
+
+Work Log:
+- Detectado que el workspace local era un scaffold fresco; se clono el repo real funnellersinfo-maker/vyv-autoglass y se sincronizo src/, public/ y configs a /home/z/my-project.
+- Creado src/components/ScrollDrive.tsx: carro V&V (SVG vista superior apuntando abajo) que recorre una carretera vertical fija ligada al progreso de scroll (useScroll + useSpring + useVelocity de framer-motion).
+  - Movil: carril izquierdo (evita WhatsApp/LanguageSwitch que viven a la derecha). Desktop: carril derecho con limite inferior que despeja el boton flotante de WhatsApp.
+  - 9 hitos = secciones reales (top, servicios, como-funciona, testimonios, antes-despues, experto, agendar, faq, ubicacion) medidos dinamicamente (offsetTop/scrollMax); dots clickeables (44px) con estado activo + pulso; scrollspy via useMotionValueEvent.
+  - HUD dopaminergico: pill de % visible mientras se scrollea (fade automatico), chip con nombre de seccion al cambiarla (MapPin), "¡Ruta completa!" con Flag al llegar al 100%.
+  - Lineas de velocidad + haz de faros aparecen con la velocidad del scroll; el carro gira 180 grados al subir (spring); pulso de motor en reposo; linea central de la carretera animada (vv-road-flow).
+  - Barra de progreso superior amarilla fija (3.5px, z-60).
+  - Accesibilidad/perf: prefers-reduced-motion muestra solo la barra; pointer-events-none en contenedor; solo transforms/opacity; botones con aria-label; setState solo en cambios (lint react-hooks limpio).
+- Integrado en src/app/page.tsx (render antes de StickyCTA para z-index correcto), llaves i18n nuevas (road.home/book/area/next/finish) en src/lib/i18n.tsx, animaciones CSS (vv-road-dashes, vv-dot-pop, vv-speedline + guard reduced-motion) en src/app/globals.css.
+- Fix colision 1 (movil): carril movido de top-74px a top-108px para despejar el topbar del hero.
+- Fix colision 2 (desktop): LanguageSwitch movido a md:right-14 para despejar el carril derecho.
+- Verificado con agent-browser: iPhone 14 (top/medio/profundo, clic en carro salta a siguiente seccion 22%->29%, clic en hito FAQ navega a #faq con offset 76px) y desktop 1440x900 (hero, medio, footer, 100% + barra llena). Cero errores de pagina en todo el recorrido.
+- bun run lint limpio; build estatico en directorio aislado (/tmp/vyv-repo, sin tocar el dev server del workspace).
+- Deploy: wrangler pages deploy -> Cloudflare Pages (vyv-autoglass) OK; push a GitHub main (commit b759992); produccion https://vyv-autoglass.pages.dev verifica HTTP/2 200 y markup de ScrollDrive presente; re-verificacion final en produccion con agent-browser (iPhone 14) OK.
+
+Stage Summary:
+- Nuevo componente estrella: ScrollDrive (carro en carretera ligado al scroll) - memorable, dopaminergico, bilingue, accesible y sin colisiones con elementos fijos existentes.
+- Archivos: src/components/ScrollDrive.tsx (nuevo), src/app/page.tsx, src/lib/i18n.tsx, src/app/globals.css, src/components/LanguageSwitch.tsx.
+- Produccion actualizada y verificada (HTTP 200 + feature visible). Cron webDevReview cada 15 min creado (job 340616).
+- Siguientes pasos sugeridos: micro-interaccion de confetti al 100%, modo "turbo" con trail mas largo, GA4 events al clickar hitos.
