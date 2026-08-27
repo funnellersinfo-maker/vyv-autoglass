@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MoveHorizontal, Clock, Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { track } from "@/lib/track";
 
 type Pair = {
   before: string;
@@ -54,6 +55,24 @@ function Slider({ pair }: { pair: Pair }) {
     setPos(Math.max(0, Math.min(100, x)));
   }, []);
 
+  // Accesible por teclado: flechas mueven el divisor (±5%).
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      const step = e.shiftKey ? 15 : 5;
+      let next: number | null = null;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = pos - step;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") next = pos + step;
+      if (e.key === "Home") next = 0;
+      if (e.key === "End") next = 100;
+      if (next === null) return;
+      e.preventDefault();
+      const clamped = Math.max(0, Math.min(100, next));
+      setPos(clamped);
+      track("vv_ba_slide", { to: Math.round(clamped) });
+    },
+    [pos]
+  );
+
   const vehicle = t(`${pair.vehicleKey}.v`);
   const service = t(`${pair.vehicleKey}.s`);
   const timeSaved = t(`${pair.vehicleKey}.t`);
@@ -78,6 +97,18 @@ function Slider({ pair }: { pair: Pair }) {
         onTouchMove={(e) => update(e.touches[0].clientX)}
         onTouchEnd={() => (dragging.current = false)}
       >
+        {/* Control accesible por teclado (invisible, cubre el área) */}
+        <div
+          role="slider"
+          tabIndex={0}
+          aria-label={`${t("ba.before")} / ${t("ba.after")} — ${vehicle}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(pos)}
+          aria-valuetext={`${Math.round(pos)}% ${t("ba.after")}`}
+          onKeyDown={onKeyDown}
+          className="absolute inset-0 z-20 touch-none cursor-ew-resize rounded-2xl outline-none focus-visible:ring-4 focus-visible:ring-vv-yellow/70"
+        />
         {/* AFTER (base layer) */}
         <Image
           src={pair.after}

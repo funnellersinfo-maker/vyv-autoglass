@@ -20,6 +20,7 @@ import LanguageSwitch from "@/components/LanguageSwitch";
 import HeroCalendar from "@/components/HeroCalendar";
 import LiveSlotsCounter from "@/components/LiveSlotsCounter";
 import SameDayCountdown from "@/components/SameDayCountdown";
+import { trackBook, trackCall } from "@/lib/track";
 
 export default function Hero() {
   const { t } = useI18n();
@@ -61,7 +62,9 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 pt-12 md:pt-16 pb-14 md:pb-20 grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+      {/* pl-12 móvil: despeja el carril del ScrollDrive (carro llega a x≈40px);
+          en md+ la carretera pasa al borde derecho y se restaura px-6. */}
+      <div className="relative z-10 mx-auto max-w-7xl pl-12 pr-4 md:px-6 pt-12 md:pt-16 pb-14 md:pb-20 grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left content */}
         <div className="lg:col-span-7">
           <motion.div
@@ -112,13 +115,13 @@ export default function Hero() {
             className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl"
           >
             <Button asChild size="lg" className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold text-base h-14 px-6 pulse-yellow-glow w-full">
-              <a href="#agendar">
+              <a href="#agendar" onClick={() => trackBook("hero")}>
                 <CalendarCheck className="mr-2 h-5 w-5 shrink-0" />
                 <span className="text-left leading-tight">{t("hero.cta.primary")}</span>
               </a>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-white/40 text-white hover:bg-white hover:text-vv-black bg-transparent font-semibold text-base h-14 px-6 w-full">
-              <a href={`tel:${BUSINESS.phoneTel}`}>
+              <a href={`tel:${BUSINESS.phoneTel}`} onClick={() => trackCall("hero")}>
                 <Phone className="mr-2 h-5 w-5 shrink-0" />
                 {t("hero.cta.secondary")}
               </a>

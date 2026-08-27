@@ -6,6 +6,7 @@ import { Phone, Clock, CalendarCheck } from "lucide-react";
 import { BUSINESS } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { trackBook, trackCall } from "@/lib/track";
 
 export default function StickyCTA() {
   const { t } = useI18n();
@@ -58,7 +59,7 @@ export default function StickyCTA() {
                   variant="outline"
                   className="hidden sm:inline-flex border-white/30 text-white hover:bg-white hover:text-vv-black bg-transparent h-11"
                 >
-                  <a href={`tel:${BUSINESS.phoneTel}`}>
+                  <a href={`tel:${BUSINESS.phoneTel}`} onClick={() => trackCall("sticky")}>
                     <Phone className="mr-1.5 h-4 w-4" />
                     {t("area.call")}
                   </a>
@@ -68,7 +69,7 @@ export default function StickyCTA() {
                   size="sm"
                   className="bg-vv-yellow text-vv-black hover:bg-vv-yellow-deep font-bold h-11 px-3 md:px-4 pulse-yellow-glow"
                 >
-                  <a href="#agendar">
+                  <a href="#agendar" onClick={() => trackBook("sticky")}>
                     <CalendarCheck className="mr-1.5 h-4 w-4 shrink-0" />
                     <span className="truncate">{t("sticky.book")}</span>
                   </a>

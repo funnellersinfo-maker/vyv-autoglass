@@ -33,6 +33,7 @@ import {
 import { Flag, MapPin } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useI18n } from "@/lib/i18n";
+import { trackMilestone, trackRoadAdvance } from "@/lib/track";
 
 /** Secciones reales de la landing (ids existentes en el DOM). */
 const SECTION_DEFS = [
@@ -112,6 +113,7 @@ export default function ScrollDrive() {
   const [marks, setMarks] = useState<number[]>([]);
   const [pct, setPct] = useState(0);
   const [sectionIdx, setSectionIdx] = useState(0);
+  const [maxIdx, setMaxIdx] = useState(0); // gamificación: hito más lejano alcanzado
   const [dir, setDir] = useState<1 | -1>(1); // 1 = bajando
   const [hudVisible, setHudVisible] = useState(false);
   const [flashLabel, setFlashLabel] = useState<string | null>(null);
@@ -120,6 +122,7 @@ export default function ScrollDrive() {
   const smoothRef = useRef(0);
   const marksRef = useRef<number[]>([]);
   const sectionRef = useRef(0);
+  const maxIdxRef = useRef(0);
   const dirRef = useRef<1 | -1>(1);
   const finishedRef = useRef(false);
   const hudTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -187,6 +190,11 @@ export default function ScrollDrive() {
       sectionRef.current = idx;
       setSectionIdx(idx);
       flashSection(t(SECTION_DEFS[idx].key));
+      // Gamificación: cada hito que pisas por primera vez queda dorado.
+      if (idx > maxIdxRef.current) {
+        maxIdxRef.current = idx;
+        setMaxIdx(idx);
+      }
     }
 
     if (v >= 0.995 && !finishedRef.current) {
@@ -224,6 +232,19 @@ export default function ScrollDrive() {
     window.scrollTo({ top: Math.max(y, 0), behavior: "smooth" });
   }, []);
 
+  const clickMilestone = useCallback(
+    (i: number) => {
+      trackMilestone(SECTION_DEFS[i].id, t(SECTION_DEFS[i].key));
+      // Los hitos saltados al navegar también cuentan como visitados.
+      if (i > maxIdxRef.current) {
+        maxIdxRef.current = i;
+        setMaxIdx(i);
+      }
+      goToId(SECTION_DEFS[i].id);
+    },
+    [goToId, t]
+  );
+
   const goNext = useCallback(() => {
     const cur = smoothRef.current;
     const nextIdx = marksRef.current.findIndex((m) => m > cur + 0.025);
@@ -233,6 +254,11 @@ export default function ScrollDrive() {
       goToId(SECTION_DEFS[nextIdx].id);
     }
   }, [goToId]);
+
+  const clickCar = useCallback(() => {
+    trackRoadAdvance(Math.round(smoothRef.current * 100));
+    goNext();
+  }, [goNext]);
 
   // ---- Posición del carro (string motion value, GPU-friendly) ----
   const carTop = useTransform(
@@ -276,25 +302,29 @@ export default function ScrollDrive() {
             >
               {marks.map((m, i) => {
                 const active = i === sectionIdx;
+                const visited = i <= maxIdx; // ya recorriste esta parada
                 return (
                   <button
                     key={SECTION_DEFS[i].id}
                     type="button"
-                    onClick={() => goToId(SECTION_DEFS[i].id)}
+                    onClick={() => clickMilestone(i)}
                     aria-label={t(SECTION_DEFS[i].key)}
                     aria-current={active ? "true" : undefined}
                     className={
-                      "pointer-events-auto absolute left-1/2 -ml-[22px] grid h-11 w-11 place-items-center"
+                      "pointer-events-auto absolute left-1/2 -ml-[22px] grid h-11 w-11 place-items-center " +
+                      "rounded-full outline-none focus-visible:ring-2 focus-visible:ring-vv-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vv-black/60"
                     }
                     style={{ top: `calc(${(m * 100).toFixed(2)}% - 22px)` }}
                   >
                     <span
-                      key={active ? "on" : "off"}
+                      key={active ? "on" : visited ? "seen" : "off"}
                       className={
-                        "block h-2 w-2 rounded-full transition-all duration-300 " +
+                        "block h-2 w-2 rounded-full transition-all duration-300 hover:scale-150 " +
                         (active
                           ? "vv-dot-pop h-2.5 w-2.5 bg-vv-yellow shadow-[0_0_12px_rgba(255,214,10,0.95)] ring-2 ring-vv-yellow/40"
-                          : "bg-white/45 ring-1 ring-white/40 group-hover:bg-white/70")
+                          : visited
+                            ? "bg-vv-yellow/75 ring-1 ring-vv-yellow/35 shadow-[0_0_8px_rgba(255,214,10,0.45)]"
+                            : "bg-white/45 ring-1 ring-white/40")
                       }
                     />
                   </button>
@@ -343,9 +373,9 @@ export default function ScrollDrive() {
               {/* Visual rotatorio (dirección del viaje) */}
               <motion.button
                 type="button"
-                onClick={goNext}
+                onClick={clickCar}
                 aria-label={t("road.next")}
-                className="pointer-events-auto absolute inset-0 grid cursor-pointer place-items-center"
+                className="pointer-events-auto absolute inset-0 grid cursor-pointer place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-vv-yellow"
                 animate={{ rotate: dir === 1 ? 0 : 180 }}
                 transition={{ type: "spring", stiffness: 240, damping: 20 }}
               >
@@ -415,7 +445,7 @@ export default function ScrollDrive() {
                     exit={{ opacity: 0, y: "-50%", scale: 0.85 }}
                     transition={{ type: "spring", stiffness: 380, damping: 26 }}
                   >
-                    <span className="rounded-md bg-vv-black/90 px-1.5 py-[3px] text-[10px] font-extrabold tabular-nums text-vv-yellow ring-1 ring-vv-yellow/40 shadow-lg">
+                    <span className="rounded-full bg-vv-black/90 px-2 py-[3px] text-[10px] font-extrabold tabular-nums text-vv-yellow ring-1 ring-vv-yellow/40 shadow-lg backdrop-blur-sm">
                       {pct}%
                     </span>
                     <span

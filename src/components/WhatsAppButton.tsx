@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { BUSINESS, whatsappLink } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
+import { trackWhatsApp } from "@/lib/track";
 
 export default function WhatsAppButton() {
   const { t } = useI18n();
@@ -79,6 +80,7 @@ export default function WhatsAppButton() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t("wa.tip.title")}
+            onClick={() => trackWhatsApp("float")}
             className="relative grid place-items-center h-14 w-14 md:h-16 md:w-16 rounded-full bg-vv-green text-white shadow-2xl pulse-whatsapp hover:scale-105 transition-transform"
           >
             <svg

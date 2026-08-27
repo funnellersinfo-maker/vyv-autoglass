@@ -132,6 +132,11 @@
   html {
     scroll-behavior: smooth;
   }
+  /* Los anclajes internos (#agendar, #servicios, ...) aterrizan DEBAJO del
+     header fijo en lugar de quedar tapados por él. */
+  section[id] {
+    scroll-margin-top: 84px;
+  }
 }
 
 /* ============ V&V AUTO GLASS — BRAND UTILITIES ============ */
