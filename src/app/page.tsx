@@ -34,8 +34,14 @@ function PageContent() {
   const { t } = useI18n();
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <a
+        href="#contenido-principal"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-vv-yellow focus:text-vv-black focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
+      >
+        Saltar al contenido principal
+      </a>
       <Header />
-      <main className="flex-1">
+      <main id="contenido-principal" className="flex-1">
         <Hero />
         <Benefits />
         <Services />

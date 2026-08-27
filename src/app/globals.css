@@ -404,3 +404,18 @@
     animation: none !important;
   }
 }
+
+/* Sello giratorio "Desde 2007" (foto del experto) */
+@keyframes vv-seal-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.vv-seal-spin {
+  animation: vv-seal-rotate 22s linear infinite;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vv-seal-spin {
+    animation: none !important;
+  }
+}

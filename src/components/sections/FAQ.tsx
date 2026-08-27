@@ -28,12 +28,27 @@ export default function FAQ() {
     { q: t("faq.q10"), a: t("faq.a10") },
   ];
 
+  // FAQPage schema (rich results) — generado de la misma fuente i18n
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <section
       id="faq"
       aria-labelledby="faq-heading"
       className="bg-vv-cream py-16 md:py-24"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="mx-auto max-w-4xl pl-12 pr-4 md:px-6">
         <div className="text-center mb-10 md:mb-14">
           <p className="kicker text-vv-yellow-deep mb-3">{t("faq.kicker")}</p>

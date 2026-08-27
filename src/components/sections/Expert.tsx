@@ -1,14 +1,39 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Award, Wrench, CalendarCheck, Quote } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Award, Wrench, CalendarCheck, Quote, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUSINESS, whatsappLink } from "@/lib/business";
 import { useI18n } from "@/lib/i18n";
+import { track } from "@/lib/track";
+
+const PHOTO = "/team/victor-van.jpg";
 
 export default function Expert() {
   const { t } = useI18n();
+  const [lightbox, setLightbox] = useState(false);
+
+  const openLightbox = useCallback(() => {
+    setLightbox(true);
+    track("vv_expert_photo_view", { photo: "victor-van" });
+  }, []);
+
+  const closeLightbox = useCallback(() => setLightbox(false), []);
+
+  // ESC para cerrar + bloqueo de scroll mientras el lightbox está abierto
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeLightbox();
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [lightbox, closeLightbox]);
 
   const stats = [
     { value: t("expert.stat1"), label: t("expert.stat1l") },
@@ -44,17 +69,75 @@ export default function Expert() {
           >
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden ring-1 ring-black/10 shadow-2xl bg-vv-cream">
               <Image
-                src="/team/victor-van.jpg"
+                src={PHOTO}
                 alt="Victor, fundador de V&V Auto Glass, junto a su van de servicio en San Diego"
                 fill
                 loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-vv-black/45 via-transparent to-transparent" />
 
+              {/* Sello giratorio "Desde 2007" */}
+              <div
+                className="absolute top-4 left-4 h-20 w-20 md:h-24 md:w-24"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 100 100"
+                  className="h-full w-full vv-seal-spin drop-shadow-lg"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="49"
+                    className="fill-vv-yellow"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="34"
+                    fill="none"
+                    stroke="#0A0A0A"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 3"
+                  />
+                  <defs>
+                    <path
+                      id="vv-seal-arc"
+                      d="M 50,50 m -41,0 a 41,41 0 1,1 82,0 a 41,41 0 1,1 -82,0"
+                    />
+                  </defs>
+                  <text
+                    className="fill-vv-black"
+                    style={{
+                      fontSize: "11.5px",
+                      fontWeight: 800,
+                      letterSpacing: "2.5px",
+                    }}
+                  >
+                    <textPath href="#vv-seal-arc">
+                      V&amp;V AUTO GLASS · DESDE 2007 ·
+                    </textPath>
+                  </text>
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <CalendarCheck className="h-6 w-6 md:h-7 md:w-7 text-vv-black" />
+                </div>
+              </div>
+
+              {/* Botón zoom → lightbox */}
+              <button
+                type="button"
+                onClick={openLightbox}
+                aria-label="Ampliar foto de Victor y la van de V&V"
+                className="absolute bottom-4 right-4 h-11 w-11 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-vv-yellow hover:scale-110 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vv-yellow focus-visible:ring-offset-2"
+              >
+                <ZoomIn className="h-5 w-5 text-vv-black" />
+              </button>
+
               {/* Name badge */}
-              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg">
+              <div className="absolute bottom-4 left-4 right-16 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg">
                 <div className="text-vv-black font-extrabold text-xl">Victor</div>
                 <div className="text-vv-yellow-deep text-xs font-semibold uppercase tracking-wider">
                   {t("expert.role")}
@@ -106,9 +189,9 @@ export default function Expert() {
                 return (
                   <div
                     key={i}
-                    className="bg-vv-cream border border-black/5 rounded-2xl p-4 md:p-5 text-center"
+                    className="group bg-vv-cream border border-black/5 rounded-2xl p-4 md:p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-vv-yellow/60 hover:bg-vv-yellow/10"
                   >
-                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-vv-yellow-deep mx-auto mb-2" />
+                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-vv-yellow-deep mx-auto mb-2 transition-transform duration-300 group-hover:scale-125" />
                     <div className="text-vv-black font-extrabold text-xl md:text-2xl leading-none">
                       {s.value}
                     </div>
@@ -139,6 +222,55 @@ export default function Expert() {
           </motion.div>
         </div>
       </div>
+
+      {/* Lightbox de la foto */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[90] bg-vv-black/85 backdrop-blur-sm flex items-center justify-center p-4 md:p-10"
+            onClick={closeLightbox}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Foto ampliada: Victor junto a la van de V&V Auto Glass"
+          >
+            <motion.div
+              initial={{ scale: 0.92, y: 12 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 8 }}
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+              className="relative max-w-4xl w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/20">
+                <Image
+                  src={PHOTO}
+                  alt="Victor, fundador de V&V Auto Glass, junto a su van de servicio en San Diego"
+                  fill
+                  sizes="(max-width: 896px) 100vw, 896px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <button
+                type="button"
+                onClick={closeLightbox}
+                aria-label="Cerrar foto ampliada"
+                autoFocus
+                className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-vv-yellow text-vv-black shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vv-yellow focus-visible:ring-offset-2"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="mt-3 text-center text-white/80 text-xs md:text-sm font-medium">
+                Victor — Fundador &amp; Dueño · V&amp;V Auto Glass · Desde 2007
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
