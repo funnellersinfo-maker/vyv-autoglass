@@ -11,7 +11,7 @@ export default function Brands() {
       aria-labelledby="brands-heading"
       className="bg-white py-16 md:py-20"
     >
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-7xl pl-12 pr-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10">
           <p className="kicker text-vv-yellow-deep mb-3">{t("brands.kicker")}</p>
           <h2

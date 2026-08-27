@@ -32,7 +32,7 @@ export default function Expert() {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
+      <div className="relative mx-auto max-w-7xl pl-12 pr-4 md:px-6">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Photo */}
           <motion.div

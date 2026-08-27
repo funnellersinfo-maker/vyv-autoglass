@@ -120,7 +120,7 @@ export default function QuoteEstimator() {
             "radial-gradient(circle at 85% 10%, rgba(255,214,10,0.14) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(255,195,0,0.10) 0%, transparent 40%)",
         }}
       />
-      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
+      <div className="relative mx-auto max-w-7xl pl-12 pr-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
           <p className="kicker text-vv-yellow-deep mb-3">{t("quote.kicker")}</p>
           <h2

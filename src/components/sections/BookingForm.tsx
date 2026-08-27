@@ -298,7 +298,7 @@ export default function BookingForm() {
       className="bg-vv-cream py-16 md:py-24 relative overflow-hidden"
     >
       {showConfetti && <Confetti />}
-      <div className="mx-auto max-w-3xl px-4 md:px-6">
+      <div className="mx-auto max-w-3xl pl-12 pr-4 md:px-6">
         <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
           <p className="kicker text-vv-yellow-deep mb-3">{t("book.kicker")}</p>
           <h2

@@ -19,7 +19,7 @@ export default function Benefits() {
       aria-labelledby="benefits-heading"
       className="bg-vv-cream py-16 md:py-24"
     >
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-7xl pl-12 pr-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
           <p className="kicker text-vv-yellow-deep mb-3">{t("benefits.kicker")}</p>
           <h2

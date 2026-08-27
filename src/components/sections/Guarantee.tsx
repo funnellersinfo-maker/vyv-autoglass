@@ -27,7 +27,7 @@ export default function Guarantee() {
         }}
         aria-hidden="true"
       />
-      <div className="relative mx-auto max-w-5xl px-4 md:px-6 text-center">
+      <div className="relative mx-auto max-w-5xl pl-12 pr-4 md:px-6 text-center">
         <motion.div
           initial={{ scale: 0.85, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
