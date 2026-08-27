@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import ScrollDrive from "@/components/ScrollDrive";
 import StickyCTA from "@/components/StickyCTA";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Hero from "@/components/sections/Hero";
@@ -62,6 +63,7 @@ function PageContent() {
         />
       </main>
       <Footer />
+      <ScrollDrive />
       <StickyCTA />
       <WhatsAppButton />
     </div>

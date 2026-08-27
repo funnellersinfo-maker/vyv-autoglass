@@ -305,6 +305,13 @@ export const DICT: Dict = {
   "sticky.call": { es: "Llama:", en: "Call:" },
   "sticky.book": { es: "Agendar Cita Gratis", en: "Book Free Appointment" },
 
+  // ScrollDrive (carro ligado al scroll)
+  "road.home": { es: "Inicio", en: "Top" },
+  "road.book": { es: "Agendar", en: "Book" },
+  "road.area": { es: "Ubicación", en: "Location" },
+  "road.next": { es: "Ir a la siguiente sección", en: "Go to next section" },
+  "road.finish": { es: "¡Ruta completa!", en: "Route complete!" },
+
   // WhatsApp float
   "wa.tip.title": { es: "Escríbenos por WhatsApp", en: "Text us on WhatsApp" },
   "wa.tip.body": { es: "Respuesta inmediata · Cotización gratis", en: "Instant reply · Free quote" },

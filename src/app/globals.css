@@ -297,3 +297,53 @@
     font-size: 0.75rem;
   }
 }
+
+/* ============ V&V SCROLLDRIVE (elemento ligado al scroll) ============ */
+
+@layer utilities {
+  /* Flujo continuo de la linea central de la carretera */
+  .vv-road-dashes {
+    background-image: linear-gradient(
+      to bottom,
+      rgba(255, 214, 10, 0.75) 0px,
+      rgba(255, 214, 10, 0.75) 9px,
+      transparent 9px,
+      transparent 22px
+    );
+    background-size: 3px 22px;
+    animation: vv-road-flow 0.85s linear infinite;
+  }
+  @keyframes vv-road-flow {
+    from { background-position-y: 0px; }
+    to { background-position-y: 22px; }
+  }
+
+  /* Pulso al alcanzar un hito de seccion */
+  .vv-dot-pop {
+    animation: vv-dot-burst 0.9s ease-out 2;
+  }
+  @keyframes vv-dot-burst {
+    0% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.65); }
+    100% { box-shadow: 0 0 0 14px rgba(255, 214, 10, 0); }
+  }
+
+  /* Lineas de velocidad: estiran hacia atras cuando aparecen */
+  .vv-speedline {
+    animation: vv-speed-stretch 0.28s linear infinite alternate;
+    transform-origin: top center;
+  }
+  .vv-speedline:nth-child(2) { animation-delay: 0.09s; }
+  .vv-speedline:nth-child(3) { animation-delay: 0.16s; }
+  @keyframes vv-speed-stretch {
+    from { transform: scaleY(0.55); opacity: 0.55; }
+    to { transform: scaleY(1.15); opacity: 1; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vv-road-dashes,
+  .vv-dot-pop,
+  .vv-speedline {
+    animation: none !important;
+  }
+}
