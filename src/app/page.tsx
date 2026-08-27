@@ -7,6 +7,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import Hero from "@/components/sections/Hero";
 import Benefits from "@/components/sections/Benefits";
 import Services from "@/components/sections/Services";
+import QuoteEstimator from "@/components/sections/QuoteEstimator";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Testimonials from "@/components/sections/Testimonials";
 import BeforeAfter from "@/components/sections/BeforeAfter";
@@ -37,6 +38,7 @@ function PageContent() {
         <Hero />
         <Benefits />
         <Services />
+        <QuoteEstimator />
         <CTABanner
           title={t("cta1.title")}
           subtitle={t("cta1.sub")}

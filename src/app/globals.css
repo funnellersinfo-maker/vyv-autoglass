@@ -347,3 +347,55 @@
     animation: none !important;
   }
 }
+
+/* ============ V&V QUOTE ESTIMATOR + CELEBRACION ============ */
+
+@layer utilities {
+  /* Confetti radial del ScrollDrive al llegar al 100% */
+  .vv-burst-piece {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 10px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: vv-burst 1.5s cubic-bezier(0.16, 0.8, 0.4, 1) forwards;
+  }
+  @keyframes vv-burst {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -30px)))
+        scale(0.55) rotate(var(--rot, 180deg));
+    }
+  }
+
+  /* Shimmer del panel de precio del cotizador */
+  .vv-shimmer {
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 214, 10, 0.10) 45%,
+      rgba(255, 255, 255, 0.14) 50%,
+      rgba(255, 214, 10, 0.10) 55%,
+      transparent 70%
+    );
+    background-size: 250% 100%;
+    animation: vv-shine 3.2s ease-in-out infinite;
+  }
+  @keyframes vv-shine {
+    0% { background-position: 130% 0; }
+    100% { background-position: -130% 0; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vv-burst-piece,
+  .vv-shimmer {
+    animation: none !important;
+  }
+}

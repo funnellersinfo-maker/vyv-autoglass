@@ -31,13 +31,14 @@ import {
   useVelocity,
 } from "framer-motion";
 import { Flag, MapPin } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useI18n } from "@/lib/i18n";
 
 /** Secciones reales de la landing (ids existentes en el DOM). */
 const SECTION_DEFS = [
   { id: "top", key: "road.home" },
   { id: "servicios", key: "nav.services" },
+  { id: "cotizador", key: "road.quote" },
   { id: "como-funciona", key: "nav.how" },
   { id: "testimonios", key: "nav.testimonials" },
   { id: "antes-despues", key: "nav.beforeAfter" },
@@ -49,6 +50,24 @@ const SECTION_DEFS = [
 
 const HEADER_OFFSET = 76;
 const CAR_BOX = 44; // px, touch target
+
+/** Confetti radial para la celebración al llegar al final de la ruta. */
+const BURST_PIECES = [
+  { dx: -6, dy: -34, rot: 220, d: 0, c: "#FFD60A" },
+  { dx: 10, dy: -30, rot: -180, d: 0.03, c: "#FFC300" },
+  { dx: 22, dy: -16, rot: 140, d: 0.06, c: "#FFD60A" },
+  { dx: 28, dy: 4, rot: -220, d: 0.02, c: "#FFFFFF" },
+  { dx: 20, dy: 24, rot: 170, d: 0.07, c: "#FFC300" },
+  { dx: 4, dy: 34, rot: -140, d: 0.04, c: "#FFD60A" },
+  { dx: -14, dy: 30, rot: 200, d: 0.09, c: "#0A0A0A" },
+  { dx: -26, dy: 16, rot: -170, d: 0.05, c: "#FFD60A" },
+  { dx: -32, dy: -6, rot: 150, d: 0.08, c: "#FFC300" },
+  { dx: -22, dy: -24, rot: -210, d: 0.01, c: "#FFFFFF" },
+  { dx: 2, dy: -20, rot: 180, d: 0.1, c: "#FFC300" },
+  { dx: 16, dy: 12, rot: -160, d: 0.02, c: "#FFD60A" },
+  { dx: -12, dy: 6, rot: 190, d: 0.06, c: "#FFD60A" },
+  { dx: 8, dy: -8, rot: -200, d: 0.11, c: "#0A0A0A" },
+] as const;
 
 export default function ScrollDrive() {
   const { t } = useI18n();
@@ -306,15 +325,44 @@ export default function ScrollDrive() {
                   <span className="vv-speedline absolute top-0 right-[7px] h-3.5 w-[2.5px] rounded-full bg-vv-yellow/90" />
                 </motion.div>
 
-                {/* Carrocería con pulso de motor en reposo */}
+                {/* Carrocería con pulso de motor en reposo + wiggle al llegar a meta */}
                 <motion.div
                   className="relative"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  animate={
+                    finished
+                      ? { scale: [1, 1.18, 1], rotate: [0, -16, 14, -9, 0] }
+                      : { scale: [1, 1.05, 1] }
+                  }
+                  transition={
+                    finished
+                      ? { duration: 0.9, ease: "easeInOut" }
+                      : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+                  }
                 >
                   <CarSvg className="h-7 w-auto md:h-8" />
                 </motion.div>
               </motion.button>
+
+              {/* Celebración confetti al completar la ruta */}
+              {finished && (
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20">
+                  {BURST_PIECES.map((p, i) => (
+                    <span
+                      key={i}
+                      className="vv-burst-piece"
+                      style={
+                        {
+                          background: p.c,
+                          "--dx": `${p.dx}px`,
+                          "--dy": `${p.dy}px`,
+                          "--rot": `${p.rot}deg`,
+                          animationDelay: `${p.d}s`,
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* HUD: % + sección (no rota con el carro) */}
               <AnimatePresence>
